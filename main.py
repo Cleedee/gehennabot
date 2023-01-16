@@ -1,4 +1,6 @@
 from pyrogram import Client, filters
+from pyrogram.types import (ReplyKeyboardMarkup, InlineKeyboardMarkup,
+                            InlineKeyboardButton)
 from dotenv import dotenv_values
 
 import service
@@ -32,7 +34,18 @@ async def procuracarta_handler(client, message):
     nome = ' '.join(message.command[1:])
     carta = service.procurar_carta(nome)
     if carta:
-        await app.send_message(message.chat.id, carta['descricao'])
+        teclado = ReplyKeyboardMarkup(
+            [
+                ['Estoques', 'Meu Estoque',]
+            ],
+            resize_keyboard = True,
+            one_time_keyboard = True
+        )
+        await app.send_message(
+            message.chat.id, 
+            carta['descricao'],
+            reply_markup = teclado,
+            )
     else:
         await app.send_message(message.chat.id,'Carta não encontrada.')
 
