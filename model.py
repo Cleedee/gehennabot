@@ -1,5 +1,5 @@
 from orator import DatabaseManager, Model
-from orator.orm import has_one
+from orator.orm import has_one, belongs_to, belongs_to_many
 
 config = {
     'sqlite': {
@@ -12,19 +12,28 @@ db = DatabaseManager(config)
 
 Model.set_connection_resolver(db)
 
+class Estoque(Model):
+    __table__ = 'estoques'
+
 class Usuario(Model):
     __table__ = 'auth_user'
 
 class Carta(Model):
     __table__ = 'cartas'
+    __timestamps__ = False
 
-class Estoque(Model):
-    __table__ = 'estoques'
-
-    @has_one
-    def dono(self):
+    @belongs_to_many('estoques','carta','dono')
+    def donos(self):
         return Usuario
 
-    @has_one
-    def carta(self):
-        return Carta
+class Deck(Model):
+    ...
+
+class Composicao(Model):
+    __table__ = 'composicao'
+
+class Entrada(Model):
+    __table__ = 'entradas'
+
+class Detalhe(Model):
+    __table__ = 'detalhes'
