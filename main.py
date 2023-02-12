@@ -33,16 +33,19 @@ def representa_library(carta):
     """
     return texto
 
-def representa_crypt(carta):
-    username_list = service.estoques_por_carta(carta['id'])
+def representa_crypt(codigo_carta, usuario):
+    carta = service.procurar_carta(codigo_carta)
+    total_estoque = service.estoque_da_carta(usuario, carta)
+    username_list = service.estoques_por_carta(carta.id)
     donos = ' '.join(username_list)
     texto = f"""
-**Nome:** {carta['nome']}\n
-**Capacidade:** {carta['capacidade']}\n
-**Disciplina:** {carta['disciplinas']}\n
-**Seita:** {carta['seita']}\n
-**Texto:** {carta['descricao']}\n
-**No acervo de:** {donos}
+**Nome:** {carta.nome}\n
+**Capacidade:** {carta.capacidade}\n
+**Disciplina:** {carta.disciplinas}\n
+**Seita:** {carta.seita}\n
+**Texto:** {carta.descricao}\n
+**No acervo de:** {donos}\n
+**No meu acervo:** {total_estoque}
     """
     return texto
 
@@ -58,17 +61,13 @@ async def eu_handler(client, message):
 @app.on_message(filters.command(['carta']))
 async def procuracarta_handler(client, message):
     nome = ' '.join(message.command[1:])
-    carta = service.procurar_carta(nome)
+    carta = service.procurar_carta_serializada(nome)
+    username = message.from_user.username
+    nick_usuario_gehenna = usuarios[username]
+    usuario = service.procurar_usuario(nick_usuario_gehenna)
     if carta:
-        teclado = ReplyKeyboardMarkup(
-            [
-                ['Estoques', 'Meu Estoque',]
-            ],
-            resize_keyboard = True,
-            one_time_keyboard = True
-        )
         print(carta)
-        texto = representa_crypt(carta) if carta['tipo'] in CARTAS_DE_CRIPTA else representa_library(carta)
+        texto = representa_crypt(carta['id'], usuario) if carta['tipo'] in CARTAS_DE_CRIPTA else representa_library(carta)
         await app.send_message(
             message.chat.id, 
             texto,

@@ -35,5 +35,11 @@ class Composicao(Model):
 class Entrada(Model):
     __table__ = 'entradas'
 
-class Detalhe(Model):
+class ItemEntrada(Model):
     __table__ = 'detalhes'
+
+class Saida(Model):
+    __table__ = 'saidas'
+
+class ItemSaida(Model):
+    __table__ = 'itens_saida'

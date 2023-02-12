@@ -1,8 +1,17 @@
 from model import Usuario, Carta, Estoque, Deck, Composicao, db
-from model import Entrada
+from model import Entrada, Saida, ItemEntrada, ItemSaida
 
 def procurar_usuario(username):
     return Usuario.where('username','=', username).first()
+
+def estoque_da_carta(usuario, carta):
+    soma_entradas = db.table('detalhes')\
+        .join('entradas','entradas.id','=','detalhes.entrada')\
+        .where('detalhes.carta','=',carta.id)\
+        .where('entradas.dono','=',usuario.id)\
+        .sum('detalhes.quantidade')
+    return soma_entradas if soma_entradas else 0
+
 
 def total_estoque(username):
     usuario = procurar_usuario(username)
@@ -12,7 +21,10 @@ def total_estoque(username):
         .sum('quantidade')
     return total
 
-def procurar_carta(nome):
+def procurar_carta(codigo):
+    return Carta.find(codigo)
+
+def procurar_carta_serializada(nome):
     carta = Carta.where('nome','=',nome).first()
     return carta.serialize() if carta else {}
 
