@@ -7,10 +7,9 @@ def procurar_usuario(username):
 def total_estoque(username):
     usuario = procurar_usuario(username)
     total = 0
-    total = db.table('entradas') \
-        .join('destaques','entradas.id','=','destaques.entrada') \
-        .where('entradas','dono','=',usuario.id) \
-        .sum('destaques.quantidade')
+    total = db.table('estoques') \
+        .where('dono','=',usuario.id) \
+        .sum('quantidade')
     return total
 
 def procurar_carta(nome):
