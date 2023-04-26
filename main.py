@@ -12,7 +12,9 @@ print('Iniciando...')
 
 usuarios = {
     'Cleedee': 'torcato',
-    'igorcarmo': 'igorak'
+    'igorcarmo': 'igorak',
+    'lucasgolden': 'lucasgolden',
+    'vdeving': 'vdeving',
 }
 
 app = Client(
@@ -21,15 +23,18 @@ app = Client(
     api_hash=config['API_HASH'], 
     bot_token=config['TOKEN_API'])
 
-def representa_library(carta):
-    username_list = service.estoques_por_carta(carta['id'])
+def representa_library(codigo_carta, usuario):
+    carta = service.procurar_carta(codigo_carta)
+    total_estoque = service.estoque_da_carta(usuario, carta)
+    username_list = service.estoques_por_carta(carta.id)
     donos = ' '.join(username_list)
     texto = f"""
-**Nome:** {carta['nome']}\n
-**Tipo:** {carta['tipo']}\n
-**Disciplina:** {carta['disciplinas']}\n
-**Texto:** {carta['descricao']}\n
-**No acervo de:** {donos}
+**Nome:** {carta.nome}\n
+**Tipo:** {carta.tipo}\n
+**Disciplina:** {carta.disciplinas}\n
+**Texto:** {carta.descricao}\n
+**No acervo de:** {donos}\n
+**No meu acervo:** {total_estoque}
     """
     return texto
 
@@ -67,7 +72,7 @@ async def procuracarta_handler(client, message):
     usuario = service.procurar_usuario(nick_usuario_gehenna)
     if carta:
         print(carta)
-        texto = representa_crypt(carta['id'], usuario) if carta['tipo'] in CARTAS_DE_CRIPTA else representa_library(carta)
+        texto = representa_crypt(carta['id'], usuario) if carta['tipo'] in CARTAS_DE_CRIPTA else representa_library(carta['id'], usuario)
         await app.send_message(
             message.chat.id, 
             texto,

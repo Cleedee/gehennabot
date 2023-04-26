@@ -10,7 +10,15 @@ def estoque_da_carta(usuario, carta):
         .where('detalhes.carta','=',carta.id)\
         .where('entradas.dono','=',usuario.id)\
         .sum('detalhes.quantidade')
-    return soma_entradas if soma_entradas else 0
+    soma_saidas = db.table('itens_saida')\
+        .join('saidas','saidas.id','=','itens_saida.saida')\
+        .where('itens_saida.carta','=',carta.id)\
+        .where('saidas.dono','=',usuario.id)\
+        .sum('itens_saida.quantidade')
+    soma_entradas = soma_entradas if soma_entradas else 0
+    soma_saidas = soma_saidas if soma_saidas else 0
+    total = soma_entradas - soma_saidas
+    return total
 
 
 def total_estoque(username):
