@@ -1,10 +1,13 @@
 from orator import DatabaseManager, Model
 from orator.orm import has_one, belongs_to, belongs_to_many
+from dotenv import dotenv_values
+
+ambiente = dotenv_values(".env")
 
 config = {
     'sqlite': {
         'driver': 'sqlite',
-        'database': '/home/claudio/Projetos/Python/web2py_37/web2py/applications/Gehenna/databases/storage.sqlite',
+        'database': ambiente['DATABASE_URL'],
     }
 }
 
