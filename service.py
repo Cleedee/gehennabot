@@ -59,7 +59,7 @@ def composicao_deck(id, username):
     usuario = procurar_usuario(username)
     composicao = db.table('composicao') \
         .join('cartas','composicao.carta','=','cartas.id') \
-        .select('composicao.quantidade', 'cartas.nome') \
+        .select('composicao.quantidade', 'cartas.nome', 'cartas.id') \
         .where('composicao.deck','=',id) \
         .get()    
     return composicao

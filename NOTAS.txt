@@ -3,3 +3,11 @@ LINKS
 
 https://static.krcg.org/
 https://nekobin.com/
+
+COMANDOS
+---------
+eu - Detalhes na Conta no Gehenna
+carta - Procura cartas pelo nome
+decks - Lista de decks
+deck - Passe o código do deck para listar um deck
+falta - Passe o código do deck e veja as cartas faltantes
