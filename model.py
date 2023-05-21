@@ -1,5 +1,5 @@
 from orator import DatabaseManager, Model
-from orator.orm import belongs_to_many, has_many, belongs_to
+from orator.orm import belongs_to_many, has_many, belongs_to, has_one
 from dotenv import dotenv_values
 
 ambiente = dotenv_values(".env")
@@ -50,8 +50,16 @@ class Entrada(Model):
 class ItemEntrada(Model):
     __table__ = 'detalhes'
 
+    @has_one('carta')
+    def carta(self):
+        return Carta
+
 class Saida(Model):
     __table__ = 'saidas'
 
 class ItemSaida(Model):
     __table__ = 'itens_saida'
+
+    @has_one('carta')
+    def carta(self):
+        return Carta
