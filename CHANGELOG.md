@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cadastrar deck por URL
 - Adoção do Poetry
 
+## [0.3.0]
+### Adicionado
+- Listar os decks construídos que possuem cartas de um deck cadastrado
+  - comando: /onde [deck_id]
+
 ## [0.2.0]
 ### Adicionado
 - Lista de cartas faltantes para completar um deck

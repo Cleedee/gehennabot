@@ -7,6 +7,7 @@ from pyrogram.types import (
 from dotenv import dotenv_values
 
 import service
+from model import db
 
 CARTAS_DE_CRIPTA = ['Vampire', 'Imbuid']
 config = dotenv_values('.env')
@@ -107,10 +108,13 @@ async def decks_handler(client, message):
 
 @app.on_message(filters.command(['deck']))
 async def deck_handler(client, message):
-    id = message.command[1:]
+    id = message.command[1]
     username = message.from_user.username
+    deck = service.deck_por_id(id, usuarios[username])
     composicao = service.composicao_deck(id, usuarios[username])
-    texto = '\n'.join([str(c.quantidade) + ' x ' + c.nome for c in composicao])
+    texto = f'**Nome:** {deck.nome}\n'
+    texto += f'**Descrição:**\n{deck.descricao}\n'
+    texto += '\n'.join([str(c.quantidade) + ' x ' + c.nome for c in composicao])
     await app.send_message(message.chat.id, texto)
 
 
@@ -141,6 +145,34 @@ async def falta_no_handler(client, message):
     )
     await app.send_message(message.chat.id, texto)
 
+@app.on_message(filters.command(['extrair']))
+async def deck_from_url_handler(client, message):
+    url = message.command[1]
+    username = message.from_user.username
+    usuario = service.procurar_usuario(usuarios[username])
+    deck = service.extrair_deck_da_internet(url, usuario)
+    if deck:
+        await app.send_message(message.chat.id, f'{deck.nome} criado.')
+    else:
+        await app.send_message(message.chat.id, 'Nenhum deck encontrado nesta URL.')
+
+
+@app.on_message(filters.command(['onde']))
+async def onde_encontrar_handler(client, message):
+    deck_id = message.command[1]
+    username = message.from_user.username
+    preconstruidos = service.decks_preconstruidos()
+    meu_deck = service.deck_por_id(deck_id, usuarios[username])
+    cartas_meu_deck = [slot.carta for slot in meu_deck.composicao().get()]
+    decks_contem = []
+    for deck in preconstruidos:
+        slot_deck = [slot.carta for slot in deck.composicao().get()]
+        presentes = set(slot_deck) & set(cartas_meu_deck)
+        if presentes:
+            nomes_presentes = list(db.table('cartas').where_in('id', list(presentes)).lists('nome'))
+            decks_contem.append( (deck.nome, nomes_presentes) )
+    texto = '\n'.join([item[0] + '\n\t\t' + '\n\t\t'.join(item[1]) for item in decks_contem])
+    await app.send_message(message.chat.id, texto)
 
 app.run()
 print('Encerrando...')

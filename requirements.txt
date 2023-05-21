@@ -4,3 +4,4 @@ PySocks==1.7.1
 python-dotenv==0.21.0
 TgCrypto==1.2.5
 orator
+requests

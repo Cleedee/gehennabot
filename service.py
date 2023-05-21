@@ -1,3 +1,7 @@
+from collections import namedtuple
+
+import requests
+
 from model import Usuario, Carta, Estoque, Deck, Composicao, db
 from model import Entrada, Saida, ItemEntrada, ItemSaida
 
@@ -36,6 +40,9 @@ def procurar_carta_serializada(nome):
     carta = Carta.where('nome','=',nome).first()
     return carta.serialize() if carta else {}
 
+def procurar_carta_por_nome(nome):
+    return Carta.where('nome','=',nome).first()
+
 def estoques_por_carta(codigo):
     carta = Carta.find(codigo)
     codigo_usuarios = [ dono.username for dono in carta.donos ]
@@ -55,6 +62,9 @@ def deck_por_id(id, username):
         return deck
     return None
 
+def decks_preconstruidos():
+    return Deck.where('preconstruido', '=', 'T').get()
+
 def composicao_deck(id, username):
     usuario = procurar_usuario(username)
     composicao = db.table('composicao') \
@@ -63,3 +73,38 @@ def composicao_deck(id, username):
         .where('composicao.deck','=',id) \
         .get()    
     return composicao
+
+def extrair_deck_da_internet(url, usuario):
+    r = requests.get(url)
+    if r.status_code != 200:
+        return None
+    texto = r.text
+    linhas = [linha for linha in texto.split('\n') if '\t' in linha]
+    Slot = namedtuple("Slot", "quantidade nome")
+    slots = [Slot(*linha.split('\t')) for linha in linhas]
+    novo_deck = Deck()
+    novo_deck.nome = 'Novo deck'
+    novo_deck.descricao = url
+    novo_deck.tipo = 'other'
+    novo_deck.dono = usuario.id
+    novo_deck.save()
+    nao_encontradas = 'Não encontradas pelo bot RutorsHandBot:\n'
+    for slot in slots:
+        carta = procurar_carta_por_nome(slot.nome)
+        if carta:
+            c = Composicao()
+            c.deck = novo_deck.id
+            c.quantidade = int(slot.quantidade)
+            c.carta = carta.id
+            c.save()
+        else:
+            nao_encontradas += f'\n{slot.quantidade} x {slot.nome}'
+            novo_deck.descricao = nao_encontradas
+    novo_deck.save()
+    return novo_deck
+
+def entradas_por_usuario(usuario):
+    return Entrada.where('dono','=', usuario.id).get()
+
+def saidas_por_usuario(usuario):
+    return Saida.where('dono','=', usuario.id).get()
