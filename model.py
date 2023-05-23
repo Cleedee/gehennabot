@@ -50,10 +50,6 @@ class Entrada(Model):
 class ItemEntrada(Model):
     __table__ = 'detalhes'
 
-    @has_one('carta')
-    def carta(self):
-        return Carta
-
 class Saida(Model):
     __table__ = 'saidas'
 

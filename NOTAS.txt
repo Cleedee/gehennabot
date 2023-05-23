@@ -13,3 +13,8 @@ deck - Passe o código do deck para listar um deck
 falta - Passe o código do deck e veja as cartas faltantes
 extrair - Cria um deck passando uma URL do VTES Decks para Lackey
 onde - Passe o código do deck que deseja ver cartas em decks preconstruídos 
+entradas - Lista as movimentações de entradas de cartas
+saidas - Lista as movimentações de saídas de cartas entenda
+detalhe_saida - Lista a quantidade e a descrição de cada carta da Saída
+detalhe_entrada - Lista a quantidade e a descrição de cada carta na Entrada
+

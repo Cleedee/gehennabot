@@ -231,6 +231,38 @@ async def entradas_handler(client, message):
         message.chat.id, texto, parse_mode=enums.ParseMode.MARKDOWN
     )
 
+@app.on_message(filters.command(['detalhe_entrada']))
+async def detalhe_entrada(client, message):
+    entrada_id = message.command[1]
+    entrada = service.entrada_por_id(entrada_id)
+    texto = service.detalhe_entrada(entrada_id)
+    texto = colocar_titulo(f'Detalhes da Movimentação de Entrada {entrada.origem}', texto)
+    await app.send_message(
+        message.chat.id, texto, parse_mode=enums.ParseMode.MARKDOWN
+    )
+
+@app.on_message(filters.command(['saidas']))
+async def saidas_handler(client, message):
+    username = message.from_user.username
+    usuario = service.procurar_usuario(usuarios[username])
+    saidas = service.saidas_por_usuario(usuario)
+    texto = '\n'.join(
+        [f'{saida.id} - {saida.descricao}' for saida in saidas]
+    )
+    texto = colocar_titulo('Movimentações de Saídas de Cartas', texto)
+    await app.send_message(
+        message.chat.id, texto, parse_mode=enums.ParseMode.MARKDOWN
+    )
+
+@app.on_message(filters.command(['detalhe_saida']))
+async def detalhe_saida(client, message):
+    saida_id = message.command[1]
+    saida = service.saida_por_id(saida_id)
+    texto = service.detalhe_saida(saida_id)
+    texto = colocar_titulo(f'Detalhes da Movimentação de Saida {saida.descricao}', texto)
+    await app.send_message(
+        message.chat.id, texto, parse_mode=enums.ParseMode.MARKDOWN
+    )
 
 app.run()
 print('Encerrando...')
