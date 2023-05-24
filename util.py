@@ -8,6 +8,7 @@ def sugestao_nome_deck(composicoes: list[Composicao]):
         grupo = slot.grupo
         if grupo not in grupos and slot.tipo == 'Vampire':
             grupos += [grupo]
+    grupos.sort()
     # adicione a principal disciplina
     # adicione Voto se tem cartas de voto
     return '/'.join(map(str, grupos))
