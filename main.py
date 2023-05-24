@@ -7,6 +7,7 @@ from pyrogram.types import (
 from dotenv import dotenv_values
 
 import service
+import util
 from model import db
 
 CARTAS_DE_CRIPTA = ['Vampire', 'Imbuid']
@@ -127,7 +128,7 @@ async def deck_handler(client, message):
     deck = service.deck_por_id(id, usuarios[username])
     if not deck:
         await app.send_message(message.chat.id, 'Deck não encontrado.')
-    composicao = service.composicao_deck(id, usuarios[username])
+    composicao = service.composicao_deck(id)
     texto = f'**Nome:** {deck.nome}\n'
     texto += f'**Descrição:**\n{deck.descricao}\n'
     texto += '\n'.join(
@@ -141,7 +142,7 @@ async def falta_no_handler(client, message):
     id = message.command[1]
     username = message.from_user.username
     usuario = service.procurar_usuario(usuarios[username])
-    slots = service.composicao_deck(id, usuarios[username])
+    slots = service.composicao_deck(id)
     cartas_id = [slot.id for slot in slots]
     print(cartas_id)
     comparador = {}
@@ -262,6 +263,19 @@ async def detalhe_saida(client, message):
     texto = colocar_titulo(f'Detalhes da Movimentação de Saida {saida.descricao}', texto)
     await app.send_message(
         message.chat.id, texto, parse_mode=enums.ParseMode.MARKDOWN
+    )
+
+
+@app.on_message(filters.command(['nomear']))
+async def sugerir_nome_deck_handler(client, message):
+    if len(message.command) < 2:
+        await app.send_message(message.chat.id, 'Informe o ID do deck.')
+        return
+    deck_id = message.command[1]
+    composicao = service.composicao_deck(deck_id)
+    nome_sugerido = util.sugestao_nome_deck(composicao)
+    await app.send_message(
+        message.chat.id, nome_sugerido, parse_mode=enums.ParseMode.MARKDOWN
     )
 
 app.run()

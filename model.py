@@ -2,6 +2,8 @@ from orator import DatabaseManager, Model
 from orator.orm import belongs_to_many, has_many, belongs_to, has_one
 from dotenv import dotenv_values
 
+GRUPOS = ['1','2','3','4','5','6','7','ANY']
+
 ambiente = dotenv_values(".env")
 
 config = {
@@ -43,6 +45,10 @@ class Composicao(Model):
     @belongs_to('deck')
     def deck(self):
         return Deck
+
+    @belongs_to('carta')
+    def carta(self):
+        return Carta
 
 class Entrada(Model):
     __table__ = 'entradas'

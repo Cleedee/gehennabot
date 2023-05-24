@@ -78,18 +78,24 @@ def deck_por_id(id, username):
 def decks_preconstruidos():
     return Deck.where('preconstruido', '=', 'T').get()
 
-
-def composicao_deck(id, username):
-    usuario = procurar_usuario(username)
+def composicao_deck(id):
     composicao = (
         db.table('composicao')
         .join('cartas', 'composicao.carta', '=', 'cartas.id')
-        .select('composicao.quantidade', 'cartas.nome', 'cartas.id')
+        .select(
+            'composicao.quantidade', 
+            'cartas.nome', 
+            'cartas.grupo', 
+            'cartas.id',
+            'cartas.tipo'
+        )
         .where('composicao.deck', '=', id)
         .get()
     )
     return composicao
 
+def composicoes_deck_por_id(id):
+    return Composicao.where('deck','=', id).get()
 
 def extrair_deck_da_internet(url, usuario):
     r = requests.get(url)
