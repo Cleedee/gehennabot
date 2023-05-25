@@ -87,7 +87,8 @@ def composicao_deck(id):
             'cartas.nome', 
             'cartas.grupo', 
             'cartas.id',
-            'cartas.tipo'
+            'cartas.tipo',
+            'cartas.clan'
         )
         .where('composicao.deck', '=', id)
         .get()
