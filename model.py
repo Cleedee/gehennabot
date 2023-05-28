@@ -42,13 +42,13 @@ class Composicao(Model):
     __table__ = 'composicao'
     __timestamps__ = False
 
-    @belongs_to('deck')
-    def deck(self):
-        return Deck
+    #@belongs_to('deck')
+    #def deck(self):
+    #    return Deck
 
-    @belongs_to('carta')
-    def carta(self):
-        return Carta
+    #    @belongs_to('carta')
+    #def carta(self):
+    #return Carta
 
 class Entrada(Model):
     __table__ = 'entradas'

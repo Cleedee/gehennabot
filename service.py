@@ -5,6 +5,7 @@ import requests
 from model import Usuario, Carta, Estoque, Deck, Composicao, db
 from model import Entrada, Saida, ItemEntrada, ItemSaida
 
+import util
 
 def procurar_usuario(username):
     return Usuario.where('username', '=', username).first()
@@ -117,6 +118,7 @@ def extrair_deck_da_internet(url, usuario):
         carta = procurar_carta_por_nome(slot.nome)
         if carta:
             c = Composicao()
+            print(novo_deck.id)
             c.deck = novo_deck.id
             c.quantidade = int(slot.quantidade)
             c.carta = carta.id
@@ -124,6 +126,9 @@ def extrair_deck_da_internet(url, usuario):
         else:
             nao_encontradas += f'\n{slot.quantidade} x {slot.nome}'
             novo_deck.descricao = nao_encontradas
+    composicao = composicao_deck(novo_deck.id)
+    nome = util.sugestao_nome_deck(composicao)
+    novo_deck.nome = nome
     novo_deck.save()
     return novo_deck
 

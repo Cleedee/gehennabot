@@ -7,8 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 - Corrigir o método service.composicao_por_id que não leva em conta o parâmetro usuário
-- Sugestão de nomes para decks cadastrados via URL
 - Adoção do Poetry
+
+## [0.5.0]
+- Sugestão de nomes para decks cadastrados via URL
 
 ## [0.4.0]
 - Cadastro de deck por URL (https://vtesdecks.com/) no formato Lackey
