@@ -32,7 +32,7 @@ def estoque_da_carta(usuario, carta):
     return total
 
 
-def total_estoque(username):
+def total_estoque(username) -> int:
     usuario = procurar_usuario(username)
     total = 0
     total = (
@@ -41,20 +41,20 @@ def total_estoque(username):
     return total
 
 
-def procurar_carta(codigo):
+def procurar_carta(codigo) -> Carta:
     return Carta.find(codigo)
 
 
-def procurar_carta_serializada(nome):
+def procurar_carta_serializada(nome: str) -> dict:
     carta = Carta.where('nome', '=', nome).first()
     return carta.serialize() if carta else {}
 
 
-def procurar_carta_por_nome(nome):
+def procurar_carta_por_nome(nome: str) -> Carta:
     return Carta.where('nome', '=', nome).first()
 
 
-def estoques_por_carta(codigo):
+def estoques_por_carta(codigo) -> list[str]:
     carta = Carta.find(codigo)
     codigo_usuarios = [dono.username for dono in carta.donos]
     return codigo_usuarios
@@ -68,7 +68,7 @@ def decks_por_usuario(username):
     return []
 
 
-def deck_por_id(id, username):
+def deck_por_id(id, username) -> Deck | None:
     usuario = procurar_usuario(username)
     deck = Deck.find(id)
     if deck.dono == usuario.id:
@@ -79,7 +79,7 @@ def deck_por_id(id, username):
 def decks_preconstruidos():
     return Deck.where('preconstruido', '=', 'T').get()
 
-def composicao_deck(id):
+def composicao_deck(id: int) -> list[Composicao]:
     composicao = (
         db.table('composicao')
         .join('cartas', 'composicao.carta', '=', 'cartas.id')
@@ -96,10 +96,10 @@ def composicao_deck(id):
     )
     return composicao
 
-def composicoes_deck_por_id(id):
+def composicoes_deck_por_id(id: int) -> list[Composicao]:
     return Composicao.where('deck','=', id).get()
 
-def extrair_deck_da_internet(url, usuario):
+def extrair_deck_da_internet(url, usuario) -> Deck | None:
     r = requests.get(url)
     if r.status_code != 200:
         return None
@@ -141,15 +141,15 @@ def saidas_por_usuario(usuario):
     return Saida.where('dono', '=', usuario.id).get()
 
 
-def entrada_por_id(id):
+def entrada_por_id(id: int) -> Entrada:
     return Entrada.find(id)
 
 
-def saida_por_id(id):
+def saida_por_id(id: int) -> Saida:
     return Saida.find(id)
 
 
-def detalhe_entrada(entrada_id):
+def detalhe_entrada(entrada_id) -> str:
     entrada = entrada_por_id(entrada_id)
     texto = '\n'.join(
         [
@@ -176,7 +176,7 @@ def detalhe_entrada(entrada_id):
     texto_cartas = '\n'.join([f'{item.quantidade} x {item.nome}' for item in itens_entrada])
     return texto + '\n\n' + texto_cartas
 
-def detalhe_saida(saida_id):
+def detalhe_saida(saida_id) -> str:
     saida = saida_por_id(saida_id)
     texto = '\n'.join(
         [

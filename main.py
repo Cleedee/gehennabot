@@ -11,6 +11,7 @@ import util
 from model import db
 
 CARTAS_DE_CRIPTA = ['Vampire', 'Imbuid']
+
 config = dotenv_values('.env')
 
 print('Iniciando...')
@@ -20,6 +21,7 @@ usuarios = {
     'igorcarmo': 'igorak',
     'lucasgolden': 'lucasgolden',
     'paulophi': 'vdeving',
+    'igoxr': 'igoxr',
 }
 
 app = Client(
@@ -63,12 +65,12 @@ def representa_crypt(codigo_carta, usuario):
     return texto
 
 
-def colocar_titulo(titulo, texto):
+def colocar_titulo(titulo: str, texto: str) -> str:
     return f'**{titulo}**\n' + texto
 
 
 @app.on_message(filters.command(['eu']))
-async def eu_handler(client, message):
+async def eu_handler(_, message):
     username = message.from_user.username
     if username in usuarios:
         total = service.total_estoque(usuarios[username])
@@ -80,7 +82,7 @@ async def eu_handler(client, message):
 
 
 @app.on_message(filters.command(['carta']))
-async def procuracarta_handler(client, message):
+async def procuracarta_handler(_, message):
     nome = ' '.join(message.command[1:])
     carta = service.procurar_carta_serializada(nome)
     username = message.from_user.username
@@ -102,7 +104,7 @@ async def procuracarta_handler(client, message):
 
 
 @app.on_message(filters.command(['decks']))
-async def decks_handler(client, message):
+async def decks_handler(_, message):
     username = message.from_user.username
     if username not in usuarios:
         await app.send_message(message.chat.id, 'Conta não encontrada.')
@@ -116,7 +118,7 @@ async def decks_handler(client, message):
 
 
 @app.on_message(filters.command(['deck']))
-async def deck_handler(client, message):
+async def deck_handler(_, message):
     if len(message.command) < 2:
         await app.send_message(message.chat.id, 'Informe o ID do deck.')
         return
@@ -138,7 +140,7 @@ async def deck_handler(client, message):
 
 
 @app.on_message(filters.command(['falta']))
-async def falta_no_handler(client, message):
+async def falta_no_handler(_, message):
     id = message.command[1]
     username = message.from_user.username
     usuario = service.procurar_usuario(usuarios[username])
@@ -176,7 +178,7 @@ async def falta_no_handler(client, message):
 
 
 @app.on_message(filters.command(['extrair']))
-async def deck_from_url_handler(client, message):
+async def deck_from_url_handler(_, message):
     url = message.command[1]
     username = message.from_user.username
     usuario = service.procurar_usuario(usuarios[username])
@@ -190,7 +192,7 @@ async def deck_from_url_handler(client, message):
 
 
 @app.on_message(filters.command(['onde']))
-async def onde_encontrar_handler(client, message):
+async def onde_encontrar_handler(_, message):
     deck_id = message.command[1]
     username = message.from_user.username
     preconstruidos = service.decks_preconstruidos()
@@ -220,7 +222,7 @@ async def onde_encontrar_handler(client, message):
 
 
 @app.on_message(filters.command(['entradas']))
-async def entradas_handler(client, message):
+async def entradas_handler(_, message):
     username = message.from_user.username
     usuario = service.procurar_usuario(usuarios[username])
     entradas = service.entradas_por_usuario(usuario)
@@ -233,7 +235,7 @@ async def entradas_handler(client, message):
     )
 
 @app.on_message(filters.command(['detalhe_entrada']))
-async def detalhe_entrada(client, message):
+async def detalhe_entrada(_, message):
     entrada_id = message.command[1]
     entrada = service.entrada_por_id(entrada_id)
     texto = service.detalhe_entrada(entrada_id)
@@ -243,7 +245,7 @@ async def detalhe_entrada(client, message):
     )
 
 @app.on_message(filters.command(['saidas']))
-async def saidas_handler(client, message):
+async def saidas_handler(_, message):
     username = message.from_user.username
     usuario = service.procurar_usuario(usuarios[username])
     saidas = service.saidas_por_usuario(usuario)
@@ -256,7 +258,7 @@ async def saidas_handler(client, message):
     )
 
 @app.on_message(filters.command(['detalhe_saida']))
-async def detalhe_saida(client, message):
+async def detalhe_saida(_, message):
     saida_id = message.command[1]
     saida = service.saida_por_id(saida_id)
     texto = service.detalhe_saida(saida_id)
@@ -267,7 +269,7 @@ async def detalhe_saida(client, message):
 
 
 @app.on_message(filters.command(['nomear']))
-async def sugerir_nome_deck_handler(client, message):
+async def sugerir_nome_deck_handler(_, message):
     if len(message.command) < 2:
         await app.send_message(message.chat.id, 'Informe o ID do deck.')
         return

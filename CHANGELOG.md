@@ -6,8 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-- Corrigir o método service.composicao_por_id que não leva em conta o parâmetro usuário
 - Adoção do Poetry
+- Comando para mostrar preconstruídos possuem cartas que faltam para um deck
+
+## [0.5.1]
+- Corrigir o método service.composicao_por_id que não leva em conta o parâmetro usuário
 
 ## [0.5.0]
 - Sugestão de nomes para decks cadastrados via URL
