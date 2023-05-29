@@ -1,5 +1,6 @@
 from model import Composicao
 
+
 def _quantifica_cartas(baralho):
     slots = {}
     for nome in baralho:
@@ -9,16 +10,20 @@ def _quantifica_cartas(baralho):
             slots[nome] = 1
     return slots
 
+
 def _ordena_por_quantidade(slots):
     return sorted(slots.items(), key=lambda x: x[1], reverse=True)
+
 
 def _quantidade_carta_mais_comum(slots):
     res = _ordena_por_quantidade(slots)
     return res[0][1]
 
+
 def _carta_mais_comum(slots):
     por_quantidade = _ordena_por_quantidade(slots)
     return por_quantidade[0][0]
+
 
 def sugestao_nome_deck(composicoes: list[Composicao]):
     cripta = []
@@ -32,8 +37,8 @@ def sugestao_nome_deck(composicoes: list[Composicao]):
         if grupo not in grupos and slot.tipo == 'Vampire':
             grupos += [grupo]
         if slot.tipo == 'Vampire':
-            cripta += slot.quantidade * [ slot.clan ]
-            nomes_vampiros += slot.quantidade * [ slot.nome ]
+            cripta += slot.quantidade * [slot.clan]
+            nomes_vampiros += slot.quantidade * [slot.nome]
         if slot.tipo == 'Political Action':
             numero_cartas_voto += slot.quantidade
     # agindo sobre os valores para extrair os grupos
@@ -47,7 +52,9 @@ def sugestao_nome_deck(composicoes: list[Composicao]):
             slots_cripta[vampiro] += 1
         else:
             slots_cripta[vampiro] = 1
-    vampiros_ordenados_por_quantidade = sorted(slots_cripta.items(), key=lambda x: x[1], reverse=True)
+    vampiros_ordenados_por_quantidade = sorted(
+        slots_cripta.items(), key=lambda x: x[1], reverse=True
+    )
     clan_mais_numeroso = vampiros_ordenados_por_quantidade[0][0]
     partes.append(clan_mais_numeroso)
     # agindo sobre os valores para extrair os vampiros

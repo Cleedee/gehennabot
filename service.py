@@ -2,10 +2,10 @@ from collections import namedtuple
 
 import requests
 
-from model import Usuario, Carta, Estoque, Deck, Composicao, db
-from model import Entrada, Saida, ItemEntrada, ItemSaida
-
 import util
+from model import (Carta, Composicao, Deck, Entrada, Estoque, ItemEntrada,
+                   ItemSaida, Saida, Usuario, db)
+
 
 def procurar_usuario(username):
     return Usuario.where('username', '=', username).first()
@@ -79,25 +79,28 @@ def deck_por_id(id, username) -> Deck | None:
 def decks_preconstruidos():
     return Deck.where('preconstruido', '=', 'T').get()
 
+
 def composicao_deck(id: int) -> list[Composicao]:
     composicao = (
         db.table('composicao')
         .join('cartas', 'composicao.carta', '=', 'cartas.id')
         .select(
-            'composicao.quantidade', 
-            'cartas.nome', 
-            'cartas.grupo', 
+            'composicao.quantidade',
+            'cartas.nome',
+            'cartas.grupo',
             'cartas.id',
             'cartas.tipo',
-            'cartas.clan'
+            'cartas.clan',
         )
         .where('composicao.deck', '=', id)
         .get()
     )
     return composicao
 
+
 def composicoes_deck_por_id(id: int) -> list[Composicao]:
-    return Composicao.where('deck','=', id).get()
+    return Composicao.where('deck', '=', id).get()
+
 
 def extrair_deck_da_internet(url, usuario) -> Deck | None:
     r = requests.get(url)
@@ -173,8 +176,11 @@ def detalhe_entrada(entrada_id) -> str:
         .order_by('cartas.tipo')
         .get()
     )
-    texto_cartas = '\n'.join([f'{item.quantidade} x {item.nome}' for item in itens_entrada])
+    texto_cartas = '\n'.join(
+        [f'{item.quantidade} x {item.nome}' for item in itens_entrada]
+    )
     return texto + '\n\n' + texto_cartas
+
 
 def detalhe_saida(saida_id) -> str:
     saida = saida_por_id(saida_id)
@@ -190,7 +196,7 @@ def detalhe_saida(saida_id) -> str:
         id=saida.id,
         descricao=saida.descricao,
         data=saida.data_cadastro,
-        tipo=saida.tipo
+        tipo=saida.tipo,
     )
     itens_saida = (
         db.table('itens_saida')
@@ -200,5 +206,7 @@ def detalhe_saida(saida_id) -> str:
         .order_by('cartas.tipo')
         .get()
     )
-    texto_cartas = '\n'.join([f'{item.quantidade} x {item.nome}' for item in itens_saida])
+    texto_cartas = '\n'.join(
+        [f'{item.quantidade} x {item.nome}' for item in itens_saida]
+    )
     return texto + '\n\n' + texto_cartas

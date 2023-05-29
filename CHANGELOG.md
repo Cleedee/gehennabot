@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 - Adoção do Poetry
 - Comando para mostrar preconstruídos possuem cartas que faltam para um deck
+- Comandos CLI para auxiliar em algumas tarefas
 
 ## [0.5.1]
 - Corrigir o método service.composicao_por_id que não leva em conta o parâmetro usuário

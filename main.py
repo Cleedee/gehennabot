@@ -145,8 +145,6 @@ async def falta_no_handler(_, message):
     username = message.from_user.username
     usuario = service.procurar_usuario(usuarios[username])
     slots = service.composicao_deck(id)
-    cartas_id = [slot.id for slot in slots]
-    print(cartas_id)
     comparador = {}
     for slot in slots:
         carta = service.procurar_carta(slot.id)
@@ -279,6 +277,17 @@ async def sugerir_nome_deck_handler(_, message):
     await app.send_message(
         message.chat.id, nome_sugerido, parse_mode=enums.ParseMode.MARKDOWN
     )
+
+@app.on_message(filters.command(['ondefaltantes']))
+async def mostrar_faltantes_preconstruidos_handler(_, message):
+    if len(message.command) < 2:
+        await app.send_message(message.chat.id, 'Informe o ID do deck.')
+        return
+    deck_id = message.command[1]
+    username = message.from_user.username
+    usuario = service.procurar_usuario(usuarios[username])
+    preconstruidos = service.decks_preconstruidos()
+    meu_deck = service.deck_por_id(deck_id, usuarios[username])
 
 app.run()
 print('Encerrando...')
