@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "gehennabot"
+version = "0.6.0"
+description = ""
+authors = ["Claudio Torcato <claudiotorcato@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+Pyrogram = "^2.0.106"
+python-dotenv = "^1.0.0"
+TgCrypto = "^1.2.5"
+orator = "^0.9.9"
+requests = "^2.31.0"
+pyaes = "^1.6.1"
+
+[tool.poetry.group.dev.dependencies]
+jupyter = "^1.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
