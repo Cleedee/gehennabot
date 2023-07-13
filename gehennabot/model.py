@@ -50,10 +50,12 @@ class Composicao(Model):
 
 class Entrada(Model):
     __table__ = 'entradas'
+    __timestamps__ = False
 
 
 class ItemEntrada(Model):
     __table__ = 'detalhes'
+    __timestamps__ = False
 
 
 class Saida(Model):

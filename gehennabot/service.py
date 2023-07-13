@@ -1,4 +1,5 @@
 from collections import namedtuple
+from datetime import date
 
 import requests
 
@@ -10,6 +11,8 @@ from model import (Carta, Composicao, Deck, Entrada, Estoque, ItemEntrada,
 def procurar_usuario(username):
     return Usuario.where('username', '=', username).first()
 
+def procurar_usuarios():
+    return Usuario.get()
 
 def estoque_da_carta(usuario, carta):
     soma_entradas = (
@@ -53,6 +56,8 @@ def procurar_carta_serializada(nome: str) -> dict:
 def procurar_carta_por_nome(nome: str) -> Carta:
     return Carta.where('nome', '=', nome).first()
 
+def procurar_cartas_por_nome(nome: str) -> list[Carta]:
+    return Carta.where('nome','like',f'%{nome}%').get()
 
 def estoques_por_carta(codigo) -> list[str]:
     carta = Carta.find(codigo)
@@ -68,18 +73,23 @@ def decks_por_usuario(username):
     return []
 
 
-def deck_por_id(id, username) -> Deck | None:
-    usuario = procurar_usuario(username)
-    deck = Deck.find(id)
-    if deck.dono == usuario.id:
-        return deck
-    return None
+def deck_por_id(id) -> Deck | None:
+    return Deck.find(id)
 
+def decks_por_nome(username: str, nome_deck: str) -> list[Deck]:
+    decks = decks_por_usuario(username)
+    return [deck for deck in decks if nome_deck in deck.nome]
 
 def decks_preconstruidos():
     return Deck.where('preconstruido', '=', 'T').get()
 
-
+def adicionar_cartas_ao_deck(deck_id: int, carta_id: int, quantidade: int):
+    c = Composicao()
+    c.quantidade = quantidade
+    c.deck = deck_id
+    c.carta = carta_id
+    c.save()
+    
 def composicao_deck(id: int) -> list[Composicao]:
     composicao = (
         db.table('composicao')
@@ -210,3 +220,23 @@ def detalhe_saida(saida_id) -> str:
         [f'{item.quantidade} x {item.nome}' for item in itens_saida]
     )
     return texto + '\n\n' + texto_cartas
+
+def adicionar_deck_como_entrada(deck_id: int, username: str):
+    with db.transaction():
+        deck = deck_por_id(deck_id)
+        composicao = composicao_deck(deck.id)
+        usuario = procurar_usuario(username)
+        entrada = Entrada()
+        entrada.data = date.today()
+        entrada.origem = deck.nome
+        entrada.preco = 0
+        entrada.dono = usuario.id
+        entrada.save()
+        for slot in composicao:
+            item = ItemEntrada()
+            item.entrada = entrada.id
+            item.quantidade = slot.quantidade
+            item.carta = slot.id
+            item.preco = 0
+            item.save()
+    return entrada

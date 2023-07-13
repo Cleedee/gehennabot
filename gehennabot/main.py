@@ -127,7 +127,7 @@ async def deck_handler(_, message):
     if username not in usuarios:
         await app.send_message(message.chat.id, 'Conta não encontrada.')
         return
-    deck = service.deck_por_id(id, usuarios[username])
+    deck = service.deck_por_id(id)
     if not deck:
         await app.send_message(message.chat.id, 'Deck não encontrado.')
     composicao = service.composicao_deck(id)
@@ -194,7 +194,7 @@ async def onde_encontrar_handler(_, message):
     deck_id = message.command[1]
     username = message.from_user.username
     preconstruidos = service.decks_preconstruidos()
-    meu_deck = service.deck_por_id(deck_id, usuarios[username])
+    meu_deck = service.deck_por_id(deck_id)
     cartas_meu_deck = [slot.carta for slot in meu_deck.composicao().get()]
     decks_contem = []
     for deck in preconstruidos:
@@ -287,7 +287,7 @@ async def mostrar_faltantes_preconstruidos_handler(_, message):
     username = message.from_user.username
     usuario = service.procurar_usuario(usuarios[username])
     preconstruidos = service.decks_preconstruidos()
-    meu_deck = service.deck_por_id(deck_id, usuarios[username])
+    meu_deck = service.deck_por_id(deck_id)
 
 app.run()
 print('Encerrando...')
