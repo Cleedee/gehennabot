@@ -66,7 +66,7 @@ def representa_crypt(codigo_carta, usuario):
 
 
 def colocar_titulo(titulo: str, texto: str) -> str:
-    return f'**{titulo}**\n' + texto
+    return f'**{titulo}**\n\n' + texto
 
 
 @app.on_message(filters.command(['eu']))
@@ -218,6 +218,32 @@ async def onde_encontrar_handler(_, message):
     )
     await app.send_message(message.chat.id, texto)
 
+@app.on_message(filters.command(['ondefaltantes']))
+async def mostrar_faltantes_preconstruidos_handler(_, message):
+    if len(message.command) < 2:
+        await app.send_message(message.chat.id, 'Informe o ID do deck.')
+        return
+    deck_id = message.command[1]
+    username = message.from_user.username
+    usuario = service.procurar_usuario(usuarios[username])
+    preconstruidos = service.decks_preconstruidos()
+    meu_deck = service.deck_por_id(deck_id)
+    if meu_deck.dono != usuario.id:
+        await app.send_message(message.chat.id, 'Deck não encontrado.')
+        return
+    faltantes = service.cartas_que_faltam_para_o_deck(meu_deck)
+    id_cartas = [id for (id, _, _) in faltantes]
+    pre_e_cartas = service.procurar_cartas_em_preconstruidos(id_cartas)
+    texto = '\n'.join(
+        [
+            f'**{item[0]}**' + '\n\t\t' + '\n\t\t'.join(item[1])
+            for item in pre_e_cartas
+        ]
+    )
+    texto = colocar_titulo(
+        f'Você pode encontrar as cartas que faltam a seguir para o {meu_deck.nome}', texto
+    )
+    await app.send_message(message.chat.id, texto)
 
 @app.on_message(filters.command(['entradas']))
 async def entradas_handler(_, message):
@@ -266,7 +292,7 @@ async def detalhe_saida(_, message):
     )
 
 
-@app.on_message(filters.command(['nomear']))
+@app.on_message(filters.command(['sugerir_nome_deck']))
 async def sugerir_nome_deck_handler(_, message):
     if len(message.command) < 2:
         await app.send_message(message.chat.id, 'Informe o ID do deck.')
@@ -278,16 +304,6 @@ async def sugerir_nome_deck_handler(_, message):
         message.chat.id, nome_sugerido, parse_mode=enums.ParseMode.MARKDOWN
     )
 
-@app.on_message(filters.command(['ondefaltantes']))
-async def mostrar_faltantes_preconstruidos_handler(_, message):
-    if len(message.command) < 2:
-        await app.send_message(message.chat.id, 'Informe o ID do deck.')
-        return
-    deck_id = message.command[1]
-    username = message.from_user.username
-    usuario = service.procurar_usuario(usuarios[username])
-    preconstruidos = service.decks_preconstruidos()
-    meu_deck = service.deck_por_id(deck_id)
 
 app.run()
 print('Encerrando...')

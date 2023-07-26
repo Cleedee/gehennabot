@@ -11,6 +11,9 @@ from model import (Carta, Composicao, Deck, Entrada, Estoque, ItemEntrada,
 def procurar_usuario(username):
     return Usuario.where('username', '=', username).first()
 
+def procurar_usuario_por_id(id):
+    return Usuario.find(id)
+
 def procurar_usuarios():
     return Usuario.get()
 
@@ -240,3 +243,33 @@ def adicionar_deck_como_entrada(deck_id: int, username: str):
             item.preco = 0
             item.save()
     return entrada
+
+def cartas_que_faltam_para_o_deck(deck: Deck):
+    faltantes = []
+    usuario = procurar_usuario_por_id(deck.dono)
+    # trazer a composição do deck
+    composicoes = composicoes_deck_por_id(deck.id)
+    # comparar cada slot com o estoque
+    for composicao in composicoes:
+        carta = procurar_carta(composicao.carta)
+        estoque = estoque_da_carta(usuario, carta)
+        diferenca = estoque - composicao.quantidade
+        if diferenca < 0:
+            faltantes += [(carta.id, carta.nome, abs(diferenca))]
+    # retornar uma lista de tuplas: id, nome e quantidade
+    return faltantes
+
+def procurar_cartas_em_preconstruidos(id_cartas: list):
+    preconstruidos = decks_preconstruidos()
+    decks_contem = []
+    for deck in preconstruidos:
+        slot_deck = [slot.carta for slot in deck.composicao().get()]
+        presentes = set(slot_deck) & set(id_cartas)
+        if presentes:
+            nomes_presentes = list(
+                db.table('cartas')
+                .where_in('id', list(presentes))
+                .lists('nome')
+            )
+            decks_contem.append((deck.nome, nomes_presentes))
+    return decks_contem
