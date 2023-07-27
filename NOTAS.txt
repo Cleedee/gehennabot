@@ -6,15 +6,16 @@ https://nekobin.com/
 
 COMANDOS
 ---------
-eu - Detalhes na Conta no Gehenna
 carta - Procura cartas pelo nome
-decks - Lista de decks
 deck - Passe o código do deck para listar um deck
-falta - Passe o código do deck e veja as cartas faltantes
-extrair - Cria um deck passando uma URL do VTES Decks para Lackey
-onde - Passe o código do deck que deseja ver cartas em decks preconstruídos 
-entradas - Lista as movimentações de entradas de cartas
-saidas - Lista as movimentações de saídas de cartas entenda
+decks - Lista de decks
 detalhe_saida - Lista a quantidade e a descrição de cada carta da Saída
 detalhe_entrada - Lista a quantidade e a descrição de cada carta na Entrada
+entradas - Lista as movimentações de entradas de cartas
+eu - Detalhes na Conta no Gehenna
+extrair - Cria um deck passando uma URL do VTES Decks para Lackey
+falta - Passe o código do deck e veja as cartas faltantes
+onde - Passe o código do deck que deseja ver cartas em decks preconstruídos 
+onde_faltantes - Passe o código do deck para ver em que preconstruídos têm cartas que faltam
+saidas - Lista as movimentações de saídas de cartas entenda
 sugerir_nome_deck - Passe o id do deck para ele sugerir um nome para o mesmo

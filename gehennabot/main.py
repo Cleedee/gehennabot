@@ -218,7 +218,7 @@ async def onde_encontrar_handler(_, message):
     )
     await app.send_message(message.chat.id, texto)
 
-@app.on_message(filters.command(['ondefaltantes']))
+@app.on_message(filters.command(['onde_faltantes']))
 async def mostrar_faltantes_preconstruidos_handler(_, message):
     if len(message.command) < 2:
         await app.send_message(message.chat.id, 'Informe o ID do deck.')
