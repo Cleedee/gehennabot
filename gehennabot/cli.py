@@ -9,7 +9,10 @@ from gehennabot.service import (
     adicionar_cartas_ao_deck,
     deck_por_id,
     cartas_que_faltam_para_o_deck,
-    procurar_cartas_em_preconstruidos
+    procurar_cartas_em_preconstruidos,
+    criar_copia_deck,
+    extrair_deck_da_internet,
+    procurar_usuario
 )
 
 app = typer.Typer()
@@ -68,8 +71,19 @@ def falta_e_procura(deck_id: int):
         for carta in deck[1]:
             print('    ',carta)
 
+@app.command()
+def copiar_deck(deck_id: int):
+    id = criar_copia_deck(deck_id)
+    print('Deck copiado com id', id)
+
+@app.command()
+def baixar_internet(url, username):
+    usuario = procurar_usuario(username)
+    deck = extrair_deck_da_internet(url, usuario)
+    print(deck.nome, 'importado com id', deck.id)
+
 def preconstruido_como_saida(deck_id, dono_id):
-    pass
+    ...
 
 if __name__ == "__main__":
     app()

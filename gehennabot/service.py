@@ -86,6 +86,24 @@ def decks_por_nome(username: str, nome_deck: str) -> list[Deck]:
 def decks_preconstruidos():
     return Deck.where('preconstruido', '=', 'T').get()
 
+def criar_copia_deck(deck_id):
+    deck = deck_por_id(deck_id)
+    novo_deck = Deck()
+    novo_deck.nome = deck.nome
+    novo_deck.descricao = deck.descricao
+    novo_deck.dono = deck.dono
+    novo_deck.tipo = deck.tipo
+    novo_deck.save()
+    slots = composicao_deck(deck.id)
+    for slot in slots:
+        c = Composicao()
+        c.deck = novo_deck.id
+        c.quantidade = slot.quantidade
+        c.carta = slot.id
+        c.save()
+    return novo_deck.id
+
+
 def adicionar_cartas_ao_deck(deck_id: int, carta_id: int, quantidade: int):
     c = Composicao()
     c.quantidade = quantidade
