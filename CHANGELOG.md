@@ -1,12 +1,17 @@
 # Changelog
 
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-- Comando para mostrar preconstruídos possuem cartas que faltam para um deck
+- Mostrar imagens das cartas
+- Importar decks de outros sites
+
+## [0.7.0]
+- Comando para mostrar preconstruídos que possuem cartas que faltam para um deck
 - Comandos CLI para auxiliar em algumas tarefas
 
 ## [0.6.0]
