@@ -1,8 +1,57 @@
 import typer
+import requests
 
 from gehennabot import service 
+from gehennabot.model import Carta
 
 app = typer.Typer()
+
+@app.command()
+def gehenna_api_create_card():
+    lista: list[Carta] = service.todas_as_cartas()
+    for carta in lista:
+        print(carta.nome)
+        json_carta = {
+            'code': carta.id,
+            'name': carta.nome,
+            'tipo': carta.tipo,
+            'disciplines': carta.disciplinas,
+            'capacity': carta.capacidade,
+            'clan': carta.clan,
+            'attributes': '' if carta.atributos is None else carta.atributos,
+            'group': '' if carta.grupo is None else str(carta.grupo),
+            'sect': '' if carta.seita is None else carta.seita,
+            'cost': '' if carta.custo is None else carta.custo,
+            'text': '' if carta.descricao is None else carta.descricao,
+            'title': '' if carta.titulo is None else carta.titulo,
+        }
+        print(json_carta)
+        r = requests.post(
+            'http://localhost:8002/cards',
+            json=json_carta
+        )
+        print(f"Status code: {r.status_code}, Response: {r.json()}")
+
+@app.command()
+def todas_cartas():
+    lista: list[Carta] = service.todas_as_cartas()
+    print("[")
+    for carta in lista:
+        print("{")
+        print('"code": "{}",'.format(carta.id))
+        print('"name": "{}",'.format(carta.nome))
+        print('"tipo": "{}",'.format(carta.tipo))
+        print('"disciplines": "{}",'.format(carta.disciplinas))
+        print('"capacity": "{}",'.format(carta.capacidade))
+        print('"clan": "{}",'.format(carta.clan))
+        print('"attributes": "{}",'.format("" if carta.atributos is None else carta.atributos))
+        print('"group": "{}",'.format("" if carta.grupo is None else carta.grupo))
+        print('"sect": "{}",'.format("" if carta.seita is None else carta.seita))
+        print('"cost": "{}",'.format(carta.custo))
+        print('"text": "{}",'.format(carta.descricao))
+        print('"title": "{}"'.format("" if carta.titulo is None else carta.titulo))
+        print("},")
+    print("]")
 
 @app.command()
 def preconstruidos():

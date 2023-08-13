@@ -62,6 +62,9 @@ def procurar_carta_por_nome(nome: str) -> Carta:
 def procurar_cartas_por_nome(nome: str) -> list[Carta]:
     return Carta.where('nome','like',f'%{nome}%').get()
 
+def todas_as_cartas() -> list[Carta]:
+    return Carta.all()
+
 def estoques_por_carta(codigo) -> list[str]:
     carta = Carta.find(codigo)
     codigo_usuarios = [dono.username for dono in carta.donos]
