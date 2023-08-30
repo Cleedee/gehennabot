@@ -1,14 +1,8 @@
-from pyrogram import Client, filters, enums
-from pyrogram.types import (
-    ReplyKeyboardMarkup,
-    InlineKeyboardMarkup,
-    InlineKeyboardButton,
-)
-from dotenv import dotenv_values
-
 import service
 import util
+from dotenv import dotenv_values
 from model import db
+from pyrogram import Client, enums, filters
 
 CARTAS_DE_CRIPTA = ['Vampire', 'Imbuid']
 
@@ -192,7 +186,6 @@ async def deck_from_url_handler(_, message):
 @app.on_message(filters.command(['onde']))
 async def onde_encontrar_handler(_, message):
     deck_id = message.command[1]
-    username = message.from_user.username
     preconstruidos = service.decks_preconstruidos()
     meu_deck = service.deck_por_id(deck_id)
     cartas_meu_deck = [slot.carta for slot in meu_deck.composicao().get()]
@@ -218,6 +211,7 @@ async def onde_encontrar_handler(_, message):
     )
     await app.send_message(message.chat.id, texto)
 
+
 @app.on_message(filters.command(['onde_faltantes']))
 async def mostrar_faltantes_preconstruidos_handler(_, message):
     if len(message.command) < 2:
@@ -226,8 +220,10 @@ async def mostrar_faltantes_preconstruidos_handler(_, message):
     deck_id = message.command[1]
     username = message.from_user.username
     usuario = service.procurar_usuario(usuarios[username])
-    preconstruidos = service.decks_preconstruidos()
     meu_deck = service.deck_por_id(deck_id)
+    if meu_deck is None:
+        await app.send_message(message.chat.id, 'Deck não encontrado.')
+        return
     if meu_deck.dono != usuario.id:
         await app.send_message(message.chat.id, 'Deck não encontrado.')
         return
@@ -241,9 +237,14 @@ async def mostrar_faltantes_preconstruidos_handler(_, message):
         ]
     )
     texto = colocar_titulo(
-        f'Você pode encontrar as cartas que faltam a seguir para o {meu_deck.nome}', texto
+        (
+            'Você pode encontrar as cartas que'
+            f'faltam a seguir para o {meu_deck.nome}'
+        ),
+        texto,
     )
     await app.send_message(message.chat.id, texto)
+
 
 @app.on_message(filters.command(['entradas']))
 async def entradas_handler(_, message):
@@ -258,35 +259,40 @@ async def entradas_handler(_, message):
         message.chat.id, texto, parse_mode=enums.ParseMode.MARKDOWN
     )
 
+
 @app.on_message(filters.command(['detalhe_entrada']))
 async def detalhe_entrada(_, message):
     entrada_id = message.command[1]
     entrada = service.entrada_por_id(entrada_id)
     texto = service.detalhe_entrada(entrada_id)
-    texto = colocar_titulo(f'Detalhes da Movimentação de Entrada {entrada.origem}', texto)
+    texto = colocar_titulo(
+        f'Detalhes da Movimentação de Entrada {entrada.origem}', texto
+    )
     await app.send_message(
         message.chat.id, texto, parse_mode=enums.ParseMode.MARKDOWN
     )
+
 
 @app.on_message(filters.command(['saidas']))
 async def saidas_handler(_, message):
     username = message.from_user.username
     usuario = service.procurar_usuario(usuarios[username])
     saidas = service.saidas_por_usuario(usuario)
-    texto = '\n'.join(
-        [f'{saida.id} - {saida.descricao}' for saida in saidas]
-    )
+    texto = '\n'.join([f'{saida.id} - {saida.descricao}' for saida in saidas])
     texto = colocar_titulo('Movimentações de Saídas de Cartas', texto)
     await app.send_message(
         message.chat.id, texto, parse_mode=enums.ParseMode.MARKDOWN
     )
+
 
 @app.on_message(filters.command(['detalhe_saida']))
 async def detalhe_saida(_, message):
     saida_id = message.command[1]
     saida = service.saida_por_id(saida_id)
     texto = service.detalhe_saida(saida_id)
-    texto = colocar_titulo(f'Detalhes da Movimentação de Saida {saida.descricao}', texto)
+    texto = colocar_titulo(
+        f'Detalhes da Movimentação de Saida {saida.descricao}', texto
+    )
     await app.send_message(
         message.chat.id, texto, parse_mode=enums.ParseMode.MARKDOWN
     )

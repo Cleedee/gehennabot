@@ -1,21 +1,30 @@
-from collections import namedtuple
 from datetime import date
 
-import requests
-
+import sources
 import util
-from model import (Carta, Composicao, Deck, Entrada, Estoque, ItemEntrada,
-                   ItemSaida, Saida, Usuario, db)
+from model import (
+    Carta,
+    Composicao,
+    Deck,
+    Entrada,
+    ItemEntrada,
+    Saida,
+    Usuario,
+    db,
+)
 
 
 def procurar_usuario(username):
     return Usuario.where('username', '=', username).first()
 
+
 def procurar_usuario_por_id(id):
     return Usuario.find(id)
 
+
 def procurar_usuarios():
     return Usuario.get()
+
 
 def estoque_da_carta(usuario, carta):
     soma_entradas = (
@@ -59,11 +68,14 @@ def procurar_carta_serializada(nome: str) -> dict:
 def procurar_carta_por_nome(nome: str) -> Carta:
     return Carta.where('nome', '=', nome).first()
 
+
 def procurar_cartas_por_nome(nome: str) -> list[Carta]:
-    return Carta.where('nome','like',f'%{nome}%').get()
+    return Carta.where('nome', 'like', f'%{nome}%').get()
+
 
 def todas_as_cartas() -> list[Carta]:
     return Carta.all()
+
 
 def estoques_por_carta(codigo) -> list[str]:
     carta = Carta.find(codigo)
@@ -82,12 +94,15 @@ def decks_por_usuario(username):
 def deck_por_id(id) -> Deck | None:
     return Deck.find(id)
 
+
 def decks_por_nome(username: str, nome_deck: str) -> list[Deck]:
     decks = decks_por_usuario(username)
     return [deck for deck in decks if nome_deck in deck.nome]
 
+
 def decks_preconstruidos():
     return Deck.where('preconstruido', '=', 'T').get()
+
 
 def criar_copia_deck(deck_id):
     deck = deck_por_id(deck_id)
@@ -113,7 +128,8 @@ def adicionar_cartas_ao_deck(deck_id: int, carta_id: int, quantidade: int):
     c.deck = deck_id
     c.carta = carta_id
     c.save()
-    
+
+
 def composicao_deck(id: int) -> list[Composicao]:
     composicao = (
         db.table('composicao')
@@ -136,14 +152,8 @@ def composicoes_deck_por_id(id: int) -> list[Composicao]:
     return Composicao.where('deck', '=', id).get()
 
 
-def extrair_deck_da_internet(url, usuario) -> Deck | None:
-    r = requests.get(url)
-    if r.status_code != 200:
-        return None
-    texto = r.text
-    linhas = [linha for linha in texto.split('\n') if '\t' in linha]
-    Slot = namedtuple('Slot', 'quantidade nome')
-    slots = [Slot(*linha.split('\t')) for linha in linhas]
+def extrair_deck_da_internet(url, usuario) -> Deck:
+    slots = sources.select_search_strategy(url)
     novo_deck = Deck()
     novo_deck.nome = 'Novo deck'
     novo_deck.descricao = url
@@ -155,7 +165,6 @@ def extrair_deck_da_internet(url, usuario) -> Deck | None:
         carta = procurar_carta_por_nome(slot.nome)
         if carta:
             c = Composicao()
-            print(novo_deck.id)
             c.deck = novo_deck.id
             c.quantidade = int(slot.quantidade)
             c.carta = carta.id
@@ -245,6 +254,7 @@ def detalhe_saida(saida_id) -> str:
     )
     return texto + '\n\n' + texto_cartas
 
+
 def adicionar_deck_como_entrada(deck_id: int, username: str):
     with db.transaction():
         deck = deck_por_id(deck_id)
@@ -265,6 +275,7 @@ def adicionar_deck_como_entrada(deck_id: int, username: str):
             item.save()
     return entrada
 
+
 def cartas_que_faltam_para_o_deck(deck: Deck):
     faltantes = []
     usuario = procurar_usuario_por_id(deck.dono)
@@ -279,6 +290,7 @@ def cartas_que_faltam_para_o_deck(deck: Deck):
             faltantes += [(carta.id, carta.nome, abs(diferenca))]
     # retornar uma lista de tuplas: id, nome e quantidade
     return faltantes
+
 
 def procurar_cartas_em_preconstruidos(id_cartas: list):
     preconstruidos = decks_preconstruidos()
