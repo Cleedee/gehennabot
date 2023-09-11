@@ -1,3 +1,5 @@
+from datetime import datetime 
+
 import requests
 import typer
 from rich.console import Console
@@ -8,6 +10,37 @@ from gehennabot.model import Carta
 
 app = typer.Typer()
 
+@app.command()
+def gehenna_api_create_moviment(username: str):
+    usuario = service.procurar_usuario(username)
+    entradas = service.entradas_por_usuario(usuario)
+    saidas = service.saidas_por_usuario(usuario)
+    for entrada in entradas:
+        json_move = {
+            'name': entrada.origem,
+            'tipo': 'E',
+            'date_move': entrada.data,
+            'owner_id': entrada.dono,
+            'price': entrada.preco if entrada.preco else 0.0,
+            'code': entrada.id 
+        }
+        r = requests.post('http://localhost:8002/stocks/moviments', json=json_move)
+        print(f'Status code: {r.status_code}, Response: {r.json()}')
+    for saida in saidas:
+        date_object = datetime.strptime(
+            saida.data_cadastro,
+            '%Y-%m-%d %H:%M:%S'
+        ).date().strftime('%Y-%m-%d')
+        json_move = {
+            'name': saida.descricao + '[' + saida.tipo if saida.tipo else '' + ']',
+            'tipo': 'S',
+            'date_move': date_object,
+            'owner_id': saida.dono,
+            'price': 0.0,
+            'code': saida.id + 1000
+        }
+        r = requests.post('http://localhost:8002/stocks/moviments', json=json_move)
+        print(f'Status code: {r.status_code}, Response: {r.json()}')
 
 @app.command()
 def gehenna_api_create_card():

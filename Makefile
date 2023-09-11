@@ -16,3 +16,5 @@ deck-vdb:
 	poetry run python gehennabot/cli.py deck-vdb ${deckid}
 servidor:
 	poetry run python gehennabot/main.py
+movimentacoes:
+	poetry run python gehennabot/cli.py gehenna-api-create-moviment ${username}
