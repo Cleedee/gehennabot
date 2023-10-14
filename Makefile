@@ -1,5 +1,7 @@
 procura-carta:
 	poetry run python gehennabot/cli.py procura-carta ${nome}
+procura-carta-id:
+	poetry run python gehennabot/cli.py procura-carta-id ${id}
 help:
 	poetry run python gehennabot/cli.py --help
 adiciona-carta:
@@ -18,3 +20,5 @@ servidor:
 	poetry run python gehennabot/main.py
 movimentacoes:
 	poetry run python gehennabot/cli.py gehenna-api-create-moviment ${username}
+itens:
+	poetry run python gehennabot/cli.py gehenna-api-create-item ${username}

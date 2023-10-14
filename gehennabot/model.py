@@ -65,6 +65,6 @@ class Saida(Model):
 class ItemSaida(Model):
     __table__ = 'itens_saida'
 
-    @has_one('carta')
-    def carta(self):
-        return Carta
+#    @has_one('carta')
+#    def carta(self):
+#        return Carta

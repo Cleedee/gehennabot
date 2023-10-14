@@ -7,8 +7,37 @@ from rich.table import Table
 
 from gehennabot import service, sources
 from gehennabot.model import Carta
+from gehennabot  import api
 
 app = typer.Typer()
+
+@app.command()
+def gehenna_api_create_item(username: str):
+    movimentacoes = api.movimentacoes_por_usuario(username)
+    for movimentacao in movimentacoes:
+        if movimentacao['tipo'] == 'E':
+            itens = service.itens_entrada_por_entrada_id(movimentacao['code'])
+            for item in itens:
+                carta = api.carta_por_codigo(item.carta)
+                json_item = {
+                    'moviment_id': movimentacao['id'],
+                    'card_id': carta['id'],
+                    'quantity': item.quantidade,
+                    'code': item.id
+                }
+                r = requests.post('http://localhost:8002/stocks/items', json=json_item)
+        else:
+            codigo_subtraido = movimentacao['code'] - 1000
+            itens = service.itens_saida_por_saida_id(codigo_subtraido)
+            for item in itens:
+                carta = api.carta_por_codigo(item.carta)
+                json_item = {
+                    'moviment_id': movimentacao['id'],
+                    'card_id': carta['id'],
+                    'quantity': item.quantidade,
+                    'code': item.id
+                }
+                r = requests.post('http://localhost:8002/stocks/items', json=json_item)
 
 @app.command()
 def gehenna_api_create_moviment(username: str):
@@ -129,6 +158,10 @@ def procura_carta(nome: str):
     for carta in lista:
         print(carta.id, carta.nome)
 
+@app.command()
+def procura_carta_id(id: int):
+    carta = service.procurar_carta(id)
+    print(carta.id, carta.nome)
 
 @app.command()
 def decks(nome: str, username='torcato'):

@@ -1,4 +1,4 @@
-from model import Composicao
+from .model import Composicao
 
 
 def _quantifica_cartas(baralho):
@@ -66,3 +66,9 @@ def sugestao_nome_deck(composicoes: list[Composicao]):
     if numero_cartas_voto > 8:
         partes.append('Voto')
     return ' '.join(partes)
+
+def divide_chunks(l, n):
+    # https://www.geeksforgeeks.org/break-list-chunks-size-n-python/
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
+

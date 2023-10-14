@@ -104,9 +104,11 @@ async def decks_handler(_, message):
         await app.send_message(message.chat.id, 'Conta não encontrada.')
     decks = service.decks_por_usuario(usuarios[username])
     if decks:
-        texto = '\n'.join([str(d.id) + ' - ' + d.nome for d in decks])
-        texto = colocar_titulo('Decks Registrados', texto)
-        await app.send_message(message.chat.id, texto)
+        chunks = list(util.divide_chunks(decks, 20))
+        for baralhos in chunks:
+            texto = '\n'.join([str(d.id) + ' - ' + d.nome for d in baralhos])
+            texto = colocar_titulo('Decks Registrados', texto)
+            await app.send_message(message.chat.id, texto)
     else:
         await app.send_message(message.chat.id, 'Decks não encontrados.')
 

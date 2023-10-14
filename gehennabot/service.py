@@ -1,13 +1,15 @@
 from datetime import date
+from typing import List
 
-import sources
-import util
-from model import (
+from . import sources
+from . import util
+from .model import (
     Carta,
     Composicao,
     Deck,
     Entrada,
     ItemEntrada,
+    ItemSaida,
     Saida,
     Usuario,
     db,
@@ -194,6 +196,11 @@ def entrada_por_id(id: int) -> Entrada:
 def saida_por_id(id: int) -> Saida:
     return Saida.find(id)
 
+def itens_entrada_por_entrada_id(id: int) -> List[ItemEntrada]:
+    return ItemEntrada.where('entrada','=', id).get()
+
+def itens_saida_por_saida_id(id: int) -> List[ItemSaida]:
+    return ItemSaida.where('saida', '=', id).get()
 
 def detalhe_entrada(entrada_id) -> str:
     entrada = entrada_por_id(entrada_id)
