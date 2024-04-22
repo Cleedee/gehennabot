@@ -11,8 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mostrar imagens das cartas
 - Importar decks de outros sites
 - Enviar itens das movimentações
+- Usar API do Gehenna-API
 
 ## [0.7.0]
+
 - Comando para mostrar preconstruídos que possuem cartas que faltam para um deck
 - Comandos CLI para auxiliar em algumas tarefas
 

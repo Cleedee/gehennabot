@@ -1,4 +1,4 @@
-from .model import Composicao
+from gehennabot.model import Composicao
 
 
 def _quantifica_cartas(baralho):

@@ -1,9 +1,11 @@
 from datetime import date
 from typing import List
 
-from . import sources
-from . import util
-from .model import (
+from gehennabot import api
+
+from gehennabot import sources
+from gehennabot import util
+from gehennabot.model import (
     Carta,
     Composicao,
     Deck,
@@ -16,19 +18,22 @@ from .model import (
 )
 
 
-def procurar_usuario(username):
+def legado_procurar_usuario(username: str) -> Usuario | None:
     return Usuario.where('username', '=', username).first()
 
+def procurar_usuario(username):
+    return api.procurar_usuario(username)
 
-def procurar_usuario_por_id(id):
+def legado_procurar_usuario_por_id(id) -> Usuario | None:
     return Usuario.find(id)
 
+def procurar_usuario_por_id(id):
+    return api.procurar_usuario_por_id(id)
 
-def procurar_usuarios():
-    return Usuario.get()
+def legado_procurar_usuarios():
+    return Usuario.all()
 
-
-def estoque_da_carta(usuario, carta):
+def legado_estoque_da_carta(usuario, carta):
     soma_entradas = (
         db.table('detalhes')
         .join('entradas', 'entradas.id', '=', 'detalhes.entrada')
@@ -48,44 +53,56 @@ def estoque_da_carta(usuario, carta):
     total = soma_entradas - soma_saidas
     return total
 
+def estoque_da_carta(usuario, carta):
+    return api.estoque_da_carta(usuario['username'], carta['id'])
 
-def total_estoque(username) -> int:
+def legado_total_estoque(username) -> int:
     usuario = procurar_usuario(username)
     total = 0
     total = (
-        db.table('estoques').where('dono', '=', usuario.id).sum('quantidade')
+        db.table('estoques').where('dono', '=', usuario['id']).sum('quantidade')
     )
     return total
 
+def legado_procurar_carta(id: int) -> Carta:
+    return Carta.find(id)
 
-def procurar_carta(codigo) -> Carta:
-    return Carta.find(codigo)
+def procurar_carta(id: int):
+    return api.procurar_carta_por_id(id)
 
-
-def procurar_carta_serializada(nome: str) -> dict:
+def legado_procurar_carta_serializada(nome: str) -> dict:
     carta = Carta.where('nome', '=', nome).first()
     return carta.serialize() if carta else {}
 
+def procurar_carta_serializada(nome: str) -> dict:
+    carta = api.procurar_carta_por_nome(nome)
+    return carta if carta else {}
 
-def procurar_carta_por_nome(nome: str) -> Carta:
-    return Carta.where('nome', '=', nome).first()
+
+def procurar_carta_por_nome(nome: str) -> dict:
+    carta = api.procurar_carta_por_nome(nome)
+    return carta if carta else {}
 
 
-def procurar_cartas_por_nome(nome: str) -> list[Carta]:
+def legado_procurar_cartas_por_nome(nome: str) -> list[Carta]:
     return Carta.where('nome', 'like', f'%{nome}%').get()
 
+def procurar_cartas_por_nome(nome: str) -> list[dict]:
+    return api.procurar_cartas_por_nome(nome)
 
-def todas_as_cartas() -> list[Carta]:
+def todas_as_cartas() -> list[dict]:
+    return api.procurar_cartas_todas()
+
+def legado_todas_as_cartas() -> list[Carta]:
     return Carta.all()
 
-
-def estoques_por_carta(codigo) -> list[str]:
+def legado_estoques_por_carta(codigo) -> list[str]:
     carta = Carta.find(codigo)
     codigo_usuarios = [dono.username for dono in carta.donos]
     return codigo_usuarios
 
 
-def decks_por_usuario(username):
+def legado_decks_por_usuario(username) -> list[Deck]:
     usuario = Usuario.where('username', '=', username).first()
     if usuario:
         decks = Deck.where('dono', '=', usuario.id).get()
@@ -93,28 +110,28 @@ def decks_por_usuario(username):
     return []
 
 
-def deck_por_id(id) -> Deck | None:
+def legado_deck_por_id(id) -> Deck | None:
     return Deck.find(id)
 
 
-def decks_por_nome(username: str, nome_deck: str) -> list[Deck]:
-    decks = decks_por_usuario(username)
+def legado_decks_por_nome(username: str, nome_deck: str) -> list[Deck]:
+    decks = legado_decks_por_usuario(username)
     return [deck for deck in decks if nome_deck in deck.nome]
 
 
-def decks_preconstruidos():
+def legado_decks_preconstruidos():
     return Deck.where('preconstruido', '=', 'T').get()
 
 
-def criar_copia_deck(deck_id):
-    deck = deck_por_id(deck_id)
+def legado_criar_copia_deck(deck_id):
+    deck = legado_deck_por_id(deck_id)
     novo_deck = Deck()
     novo_deck.nome = deck.nome
     novo_deck.descricao = deck.descricao
     novo_deck.dono = deck.dono
     novo_deck.tipo = deck.tipo
     novo_deck.save()
-    slots = composicao_deck(deck.id)
+    slots = legado_composicao_deck(deck.id)
     for slot in slots:
         c = Composicao()
         c.deck = novo_deck.id
@@ -124,7 +141,7 @@ def criar_copia_deck(deck_id):
     return novo_deck.id
 
 
-def adicionar_cartas_ao_deck(deck_id: int, carta_id: int, quantidade: int):
+def legado_adicionar_cartas_ao_deck(deck_id: int, carta_id: int, quantidade: int):
     c = Composicao()
     c.quantidade = quantidade
     c.deck = deck_id
@@ -132,7 +149,7 @@ def adicionar_cartas_ao_deck(deck_id: int, carta_id: int, quantidade: int):
     c.save()
 
 
-def composicao_deck(id: int) -> list[Composicao]:
+def legado_composicao_deck(id: int) -> list[Composicao]:
     composicao = (
         db.table('composicao')
         .join('cartas', 'composicao.carta', '=', 'cartas.id')
@@ -150,11 +167,11 @@ def composicao_deck(id: int) -> list[Composicao]:
     return composicao
 
 
-def composicoes_deck_por_id(id: int) -> list[Composicao]:
+def legado_composicoes_deck_por_id(id: int) -> list[Composicao]:
     return Composicao.where('deck', '=', id).get()
 
 
-def extrair_deck_da_internet(url, usuario) -> Deck:
+def legado_extrair_deck_da_internet(url, usuario) -> Deck:
     slots = sources.select_search_strategy(url)
     novo_deck = Deck()
     novo_deck.nome = 'Novo deck'
@@ -174,36 +191,35 @@ def extrair_deck_da_internet(url, usuario) -> Deck:
         else:
             nao_encontradas += f'\n{slot.quantidade} x {slot.nome}'
             novo_deck.descricao = nao_encontradas
-    composicao = composicao_deck(novo_deck.id)
+    composicao = legado_composicao_deck(novo_deck.id)
     nome = util.sugestao_nome_deck(composicao)
     novo_deck.nome = nome
     novo_deck.save()
     return novo_deck
 
 
-def entradas_por_usuario(usuario):
+def legado_entradas_por_usuario(usuario: Usuario):
     return Entrada.where('dono', '=', usuario.id).get()
 
-
-def saidas_por_usuario(usuario):
+def legado_saidas_por_usuario(usuario: Usuario):
     return Saida.where('dono', '=', usuario.id).get()
 
 
-def entrada_por_id(id: int) -> Entrada:
+def legado_entrada_por_id(id: int) -> Entrada:
     return Entrada.find(id)
 
 
-def saida_por_id(id: int) -> Saida:
+def legado_saida_por_id(id: int) -> Saida:
     return Saida.find(id)
 
-def itens_entrada_por_entrada_id(id: int) -> List[ItemEntrada]:
+def legado_itens_entrada_por_entrada_id(id: int) -> List[ItemEntrada]:
     return ItemEntrada.where('entrada','=', id).get()
 
-def itens_saida_por_saida_id(id: int) -> List[ItemSaida]:
+def legado_itens_saida_por_saida_id(id: int) -> List[ItemSaida]:
     return ItemSaida.where('saida', '=', id).get()
 
-def detalhe_entrada(entrada_id) -> str:
-    entrada = entrada_por_id(entrada_id)
+def legado_detalhe_entrada(entrada_id) -> str:
+    entrada = legado_entrada_por_id(entrada_id)
     texto = '\n'.join(
         [
             '**Entrada ID:** {id}',
@@ -232,8 +248,8 @@ def detalhe_entrada(entrada_id) -> str:
     return texto + '\n\n' + texto_cartas
 
 
-def detalhe_saida(saida_id) -> str:
-    saida = saida_por_id(saida_id)
+def legado_detalhe_saida(saida_id) -> str:
+    saida = legado_saida_por_id(saida_id)
     texto = '\n'.join(
         [
             '**Saida ID:** {id}',
@@ -262,11 +278,11 @@ def detalhe_saida(saida_id) -> str:
     return texto + '\n\n' + texto_cartas
 
 
-def adicionar_deck_como_entrada(deck_id: int, username: str):
+def legado_adicionar_deck_como_entrada(deck_id: int, username: str):
     with db.transaction():
-        deck = deck_por_id(deck_id)
-        composicao = composicao_deck(deck.id)
-        usuario = procurar_usuario(username)
+        deck = legado_deck_por_id(deck_id)
+        composicao = legado_composicao_deck(deck.id)
+        usuario = legado_procurar_usuario(username)
         entrada = Entrada()
         entrada.data = date.today()
         entrada.origem = deck.nome
@@ -283,15 +299,15 @@ def adicionar_deck_como_entrada(deck_id: int, username: str):
     return entrada
 
 
-def cartas_que_faltam_para_o_deck(deck: Deck):
+def legado_cartas_que_faltam_para_o_deck(deck: Deck):
     faltantes = []
-    usuario = procurar_usuario_por_id(deck.dono)
+    usuario = legado_procurar_usuario_por_id(deck.dono)
     # trazer a composição do deck
-    composicoes = composicoes_deck_por_id(deck.id)
+    composicoes = legado_composicoes_deck_por_id(deck.id)
     # comparar cada slot com o estoque
     for composicao in composicoes:
-        carta = procurar_carta(composicao.carta)
-        estoque = estoque_da_carta(usuario, carta)
+        carta = legado_procurar_carta(composicao.carta)
+        estoque = legado_estoque_da_carta(usuario, carta)
         diferenca = estoque - composicao.quantidade
         if diferenca < 0:
             faltantes += [(carta.id, carta.nome, abs(diferenca))]
@@ -299,8 +315,8 @@ def cartas_que_faltam_para_o_deck(deck: Deck):
     return faltantes
 
 
-def procurar_cartas_em_preconstruidos(id_cartas: list):
-    preconstruidos = decks_preconstruidos()
+def legado_procurar_cartas_em_preconstruidos(id_cartas: list):
+    preconstruidos = legado_decks_preconstruidos()
     decks_contem = []
     for deck in preconstruidos:
         slot_deck = [slot.carta for slot in deck.composicao().get()]

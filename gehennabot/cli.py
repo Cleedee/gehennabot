@@ -16,8 +16,9 @@ def gehenna_api_create_item(username: str):
     movimentacoes = api.movimentacoes_por_usuario(username)
     for movimentacao in movimentacoes:
         if movimentacao['tipo'] == 'E':
-            itens = service.itens_entrada_por_entrada_id(movimentacao['code'])
+            itens = service.legado_itens_entrada_por_entrada_id(movimentacao['code'])
             for item in itens:
+                print(f'Carta: {item.carta}')
                 carta = api.carta_por_codigo(item.carta)
                 json_item = {
                     'moviment_id': movimentacao['id'],
@@ -28,7 +29,7 @@ def gehenna_api_create_item(username: str):
                 r = requests.post('http://localhost:8002/stocks/items', json=json_item)
         else:
             codigo_subtraido = movimentacao['code'] - 1000
-            itens = service.itens_saida_por_saida_id(codigo_subtraido)
+            itens = service.legado_itens_saida_por_saida_id(codigo_subtraido)
             for item in itens:
                 carta = api.carta_por_codigo(item.carta)
                 json_item = {
@@ -41,9 +42,9 @@ def gehenna_api_create_item(username: str):
 
 @app.command()
 def gehenna_api_create_moviment(username: str):
-    usuario = service.procurar_usuario(username)
-    entradas = service.entradas_por_usuario(usuario)
-    saidas = service.saidas_por_usuario(usuario)
+    usuario = service.legado_procurar_usuario(username)
+    entradas = service.legado_entradas_por_usuario(usuario)
+    saidas = service.legado_saidas_por_usuario(usuario)
     for entrada in entradas:
         json_move = {
             'name': entrada.origem,
@@ -73,7 +74,7 @@ def gehenna_api_create_moviment(username: str):
 
 @app.command()
 def gehenna_api_create_card():
-    lista: list[Carta] = service.todas_as_cartas()
+    lista: list[Carta] = service.legado_todas_as_cartas()
     for carta in lista:
         print(carta.nome)
         json_carta = {
@@ -94,10 +95,38 @@ def gehenna_api_create_card():
         r = requests.post('http://localhost:8002/cards', json=json_carta)
         print(f'Status code: {r.status_code}, Response: {r.json()}')
 
+@app.command()
+def gehenna_api_create_deck(username: str):
+    decks = service.legado_decks_por_usuario(username)
+    for deck in decks:
+        json_deck =  {
+            'name': deck.nome,
+            'description': deck.descricao,
+            'creator': deck.criador,
+            'player': deck.jogador,
+            'tipo': deck.tipo,
+            'created': deck.data_cadastro,
+            'updated': deck.ultima_atualizacao,
+            'preconstructed': deck.preconstruido or False,
+            'owner_id': deck.dono,
+            'code': deck.id
+        }
+        print(json_deck)
+        r = requests.post('http://localhost:8002/decks', json=json_deck)
+        print(f'Status code: {r.status_code}, Response: {r.json()}')
+
+@app.command()
+def gehenna_api_create_slot(username: str):
+    decks = service.legado_decks_por_usuario(username)
+    for deck in decks:
+        slot = service.legado_composicao_deck(deck.id)
+        json_slot = {
+
+        }
 
 @app.command()
 def todas_cartas():
-    lista: list[Carta] = service.todas_as_cartas()
+    lista: list[Carta] = service.legado_todas_as_cartas()
     print('[')
     for carta in lista:
         print('{')
@@ -131,7 +160,7 @@ def todas_cartas():
 
 @app.command()
 def preconstruidos():
-    lista = service.decks_preconstruidos()
+    lista = service.legado_decks_preconstruidos()
     for deck in lista:
         print(deck.id, deck.nome)
 
@@ -145,7 +174,7 @@ def usuarios():
 
 @app.command()
 def adicionar_precon(deck_id: int, dono: str):
-    entrada = service.adicionar_deck_como_entrada(deck_id, dono)
+    entrada = service.legado_adicionar_deck_como_entrada(deck_id, dono)
     if entrada:
         print('Nova entrada incluída.')
     else:
@@ -154,19 +183,19 @@ def adicionar_precon(deck_id: int, dono: str):
 
 @app.command()
 def procura_carta(nome: str):
-    lista = service.procurar_cartas_por_nome(nome)
+    lista = service.legado_procurar_cartas_por_nome(nome)
     for carta in lista:
         print(carta.id, carta.nome)
 
 @app.command()
 def procura_carta_id(id: int):
-    carta = service.procurar_carta(id)
+    carta = service.legado_procurar_carta(id)
     print(carta.id, carta.nome)
 
 @app.command()
 def decks(nome: str, username='torcato'):
     table = Table(title=f'Decks de {username}')
-    lista = service.decks_por_nome(username, nome)
+    lista = service.legado_decks_por_nome(username, nome)
     table.add_column("ID", style="cyan")
     table.add_column("Name", style="cyan")
     for deck in lista:
@@ -176,23 +205,23 @@ def decks(nome: str, username='torcato'):
 
 @app.command()
 def adicionar(deck_id: int, carta_id: int, quantidade: int):
-    service.adicionar_cartas_ao_deck(deck_id, carta_id, quantidade)
+    service.legado_adicionar_cartas_ao_deck(deck_id, carta_id, quantidade)
     print('Cartas adicionadas.')
 
 
 @app.command()
 def falta(deck_id: int):
-    deck = service.deck_por_id(deck_id)
-    faltantes = service.cartas_que_faltam_para_o_deck(deck)
+    deck = service.legado_deck_por_id(deck_id)
+    faltantes = service.legado_cartas_que_faltam_para_o_deck(deck)
     for id, nome, quantidade in faltantes:
         print(quantidade, f'({id}) {nome}')
 
 
 @app.command()
 def falta_e_procura(deck_id: int):
-    deck = service.deck_por_id(deck_id)
-    faltantes = service.cartas_que_faltam_para_o_deck(deck)
-    decks = service.procurar_cartas_em_preconstruidos(
+    deck = service.legado_deck_por_id(deck_id)
+    faltantes = service.legado_cartas_que_faltam_para_o_deck(deck)
+    decks = service.legado_procurar_cartas_em_preconstruidos(
         [id for (id, _, _) in faltantes]
     )
     for deck in decks:
@@ -203,14 +232,14 @@ def falta_e_procura(deck_id: int):
 
 @app.command()
 def copiar_deck(deck_id: int):
-    id = service.criar_copia_deck(deck_id)
+    id = service.legado_criar_copia_deck(deck_id)
     print('Deck copiado com id', id)
 
 
 @app.command()
 def baixar_internet(url, username):
-    usuario = service.procurar_usuario(username)
-    deck = service.extrair_deck_da_internet(url, usuario)
+    usuario = service.legado_procurar_usuario(username)
+    deck = service.legado_extrair_deck_da_internet(url, usuario)
     print(deck.nome, 'importado com id', deck.id)
 
 

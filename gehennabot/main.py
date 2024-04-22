@@ -29,13 +29,13 @@ app = Client(
 def representa_library(codigo_carta, usuario):
     carta = service.procurar_carta(codigo_carta)
     total_estoque = service.estoque_da_carta(usuario, carta)
-    username_list = service.estoques_por_carta(carta.id)
+    username_list = service.estoques_por_carta(carta['id'])
     donos = ' '.join(username_list)
     texto = f"""
-**Nome:** {carta.nome}\n
-**Tipo:** {carta.tipo}\n
-**Disciplina:** {carta.disciplinas}\n
-**Texto:** {carta.descricao}\n
+**Nome:** {carta['name']}\n
+**Tipo:** {carta['tipo']}\n
+**Disciplina:** {carta['disciplines']}\n
+**Texto:** {carta['text']}\n
 **No acervo de:** {donos}\n
 **No meu acervo:** {total_estoque}
     """
