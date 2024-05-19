@@ -29,7 +29,7 @@ app = Client(
 def representa_library(codigo_carta, usuario):
     carta = service.procurar_carta(codigo_carta)
     total_estoque = service.estoque_da_carta(usuario, carta)
-    username_list = service.estoques_por_carta(carta['id'])
+    username_list = service.legado_estoques_por_carta(carta['code'])
     donos = ' '.join(username_list)
     texto = f"""
 **Nome:** {carta['name']}\n
@@ -45,14 +45,14 @@ def representa_library(codigo_carta, usuario):
 def representa_crypt(codigo_carta, usuario):
     carta = service.procurar_carta(codigo_carta)
     total_estoque = service.estoque_da_carta(usuario, carta)
-    username_list = service.estoques_por_carta(carta.id)
+    username_list = service.legado_estoques_por_carta(carta['code'])
     donos = ' '.join(username_list)
     texto = f"""
-**Nome:** {carta.nome}\n
-**Capacidade:** {carta.capacidade}\n
-**Disciplina:** {carta.disciplinas}\n
-**Seita:** {carta.seita}\n
-**Texto:** {carta.descricao}\n
+**Nome:** {carta['name']}\n
+**Capacidade:** {carta['capacity']}\n
+**Disciplina:** {carta['disciplines']}\n
+**Seita:** {carta['sect']}\n
+**Texto:** {carta['text']}\n
 **No acervo de:** {donos}\n
 **No meu acervo:** {total_estoque}
     """
@@ -67,7 +67,7 @@ def colocar_titulo(titulo: str, texto: str) -> str:
 async def eu_handler(_, message):
     username = message.from_user.username
     if username in usuarios:
-        total = service.total_estoque(usuarios[username])
+        total = service.legado_total_estoque(usuarios[username])
         await app.send_message(
             message.chat.id, 'Você tem {} cartas'.format(total)
         )
@@ -78,7 +78,7 @@ async def eu_handler(_, message):
 @app.on_message(filters.command(['carta']))
 async def procuracarta_handler(_, message):
     nome = ' '.join(message.command[1:])
-    carta = service.procurar_carta_serializada(nome)
+    carta = service.procurar_carta_por_nome(nome)
     username = message.from_user.username
     if username not in usuarios:
         await app.send_message(message.chat.id, 'Conta não encontrada.')
@@ -106,7 +106,7 @@ async def decks_handler(_, message):
     if decks:
         chunks = list(util.divide_chunks(decks, 20))
         for baralhos in chunks:
-            texto = '\n'.join([str(d.id) + ' - ' + d.nome for d in baralhos])
+            texto = '\n'.join([str(d['id']) + ' - ' + d['name'] for d in baralhos])
             texto = colocar_titulo('Decks Registrados', texto)
             await app.send_message(message.chat.id, texto)
     else:
@@ -127,8 +127,8 @@ async def deck_handler(_, message):
     if not deck:
         await app.send_message(message.chat.id, 'Deck não encontrado.')
     composicao = service.composicao_deck(id)
-    texto = f'**Nome:** {deck.nome}\n'
-    texto += f'**Descrição:**\n{deck.descricao}\n'
+    texto = f"**Nome:** {deck['name']}\n"
+    texto += f"**Descrição:**\n{deck.descricao}\n"
     texto += '\n'.join(
         [str(c.quantidade) + ' x ' + c.nome for c in composicao]
     )

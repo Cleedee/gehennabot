@@ -14,7 +14,7 @@ def procurar_carta_por_id(id: int) -> dict:
     r = requests.get(f'{URL}/cards/{id}')
     return r.json()
 
-def procurar_carta_por_nome(nome: str):
+def procurar_carta_por_nome(nome: str) -> dict:
     r = requests.get(f'{URL}/cards/{nome}/name')
     return r.json()
 
@@ -41,3 +41,15 @@ def procurar_usuarios():
 def estoque_da_carta(username, card_id):
     r = requests.get(f'{URL}/cards/{card_id}/{username}')
     return r.json()
+
+def procurar_decks_por_usuario(username:str):
+    r = requests.get(f'{URL}/decks/{username}')
+    return r.json()['decks']
+
+def procurar_deck_por_id(id: str):
+    r = requests.get(f'{URL}/decks/{id}')
+    return r.json()
+
+def procurar_slots_por_deck(deck_id: str):
+    r = requests.get(f'{URL}/slots/{deck_id}/deck')
+    return r.json()['slots']

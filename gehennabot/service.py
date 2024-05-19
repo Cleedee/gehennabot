@@ -74,15 +74,9 @@ def legado_procurar_carta_serializada(nome: str) -> dict:
     carta = Carta.where('nome', '=', nome).first()
     return carta.serialize() if carta else {}
 
-def procurar_carta_serializada(nome: str) -> dict:
-    carta = api.procurar_carta_por_nome(nome)
-    return carta if carta else {}
-
-
 def procurar_carta_por_nome(nome: str) -> dict:
     carta = api.procurar_carta_por_nome(nome)
-    return carta if carta else {}
-
+    return carta
 
 def legado_procurar_cartas_por_nome(nome: str) -> list[Carta]:
     return Carta.where('nome', 'like', f'%{nome}%').get()
@@ -109,10 +103,15 @@ def legado_decks_por_usuario(username) -> list[Deck]:
         return decks
     return []
 
+def decks_por_usuario(username: str) -> list[dict]:
+    decks = api.procurar_decks_por_usuario(username)
+    return decks
 
 def legado_deck_por_id(id) -> Deck | None:
     return Deck.find(id)
 
+def deck_por_id(id) -> dict:
+    return api.procurar_deck_por_id(id)
 
 def legado_decks_por_nome(username: str, nome_deck: str) -> list[Deck]:
     decks = legado_decks_por_usuario(username)

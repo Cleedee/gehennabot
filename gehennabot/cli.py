@@ -117,12 +117,17 @@ def gehenna_api_create_deck(username: str):
 
 @app.command()
 def gehenna_api_create_slot(username: str):
-    decks = service.legado_decks_por_usuario(username)
+    decks = service.decks_por_usuario(username)
     for deck in decks:
-        slot = service.legado_composicao_deck(deck.id)
+        slot = service.legado_composicao_deck(deck['code'])
         json_slot = {
-
+            'deck_id': slot.deck,
+            'card_id': slot.carta,
+            'quantity': slot.quantidade
         }
+        print(json_slot)
+        r = requests.post("http://localhost:8002/slots/{deck['id']}", json=json_slot)
+        print(f'Status code: {r.status_code}, Response: {r.json()}')
 
 @app.command()
 def todas_cartas():
