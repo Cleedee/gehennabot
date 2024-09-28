@@ -22,12 +22,8 @@ onde_faltantes - Passe o código do deck para ver em que preconstruídos têm ca
 saidas - Lista as movimentações de saídas de cartas entenda
 sugerir_nome_deck - Passe o id do deck para ele sugerir um nome para o mesmo
 
-CONTRATOS COM A API
----------
-O endpoint /slots/{deck_id}/deck poderia trazer alguns informações da carta além do id,
-como nome, por exemplo.
 
 FAZENDO AGORA
 ---------
 
-Modificando comando "deck" 
+Repassar a extração do deck para a API.

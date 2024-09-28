@@ -1,7 +1,6 @@
 import service
 import util
 from dotenv import dotenv_values
-from model import db
 from pyrogram import Client, enums, filters
 
 CARTAS_DE_CRIPTA = ['Vampire', 'Imbuid']
@@ -29,8 +28,8 @@ app = Client(
 def representa_library(codigo_carta, usuario):
     carta = service.procurar_carta(codigo_carta)
     total_estoque = service.estoque_da_carta(usuario, carta)
-    username_list = service.legado_estoques_por_carta(carta['code'])
-    donos = ' '.join(username_list)
+    users = service.procurar_donos_da_carta(carta['id'])
+    donos = ' '.join([ u['username'] for u in users ])
     texto = f"""
 **Nome:** {carta['name']}\n
 **Tipo:** {carta['tipo']}\n
@@ -45,8 +44,8 @@ def representa_library(codigo_carta, usuario):
 def representa_crypt(codigo_carta, usuario):
     carta = service.procurar_carta(codigo_carta)
     total_estoque = service.estoque_da_carta(usuario, carta)
-    username_list = service.legado_estoques_por_carta(carta['code'])
-    donos = ' '.join(username_list)
+    users = service.procurar_donos_da_carta(carta['id'])
+    donos = ' '.join([ u['username'] for u in users ])
     texto = f"""
 **Nome:** {carta['name']}\n
 **Capacidade:** {carta['capacity']}\n
@@ -67,7 +66,7 @@ def colocar_titulo(titulo: str, texto: str) -> str:
 async def eu_handler(_, message):
     username = message.from_user.username
     if username in usuarios:
-        total = service.legado_total_estoque(usuarios[username])
+        total = service.total_estoque(usuarios[username])
         await app.send_message(
             message.chat.id, 'Você tem {} cartas'.format(total)
         )
@@ -126,11 +125,11 @@ async def deck_handler(_, message):
     deck = service.deck_por_id(id)
     if not deck:
         await app.send_message(message.chat.id, 'Deck não encontrado.')
-    composicao = service.composicao_deck(id)
+    slots = service.slots_por_deck(id)
     texto = f"**Nome:** {deck['name']}\n"
-    texto += f"**Descrição:**\n{deck.descricao}\n"
+    texto += f"**Descrição:**\n{deck['description']}\n"
     texto += '\n'.join(
-        [str(c.quantidade) + ' x ' + c.nome for c in composicao]
+        [str(s['quantity']) + ' x ' + s['card']['name'] for s in slots]
     )
     await app.send_message(message.chat.id, texto)
 
@@ -140,15 +139,15 @@ async def falta_no_handler(_, message):
     id = message.command[1]
     username = message.from_user.username
     usuario = service.procurar_usuario(usuarios[username])
-    slots = service.composicao_deck(id)
+    slots = service.slots_por_deck(id)
     comparador = {}
     for slot in slots:
-        carta = service.procurar_carta(slot.id)
+        carta = service.procurar_carta(slot['card_id'])
         estoque = service.estoque_da_carta(usuario, carta)
-        comparador[slot.id] = {
-            'quantidade': slot.quantidade,
+        comparador[slot['id']] = {
+            'quantidade': slot['quantity'],
             'estoque': estoque,
-            'nome': carta.nome,
+            'nome': carta['name'],
         }
     em_falta = {}
     for id_carta in comparador.keys():
@@ -190,28 +189,31 @@ async def onde_encontrar_handler(_, message):
     deck_id = message.command[1]
     preconstruidos = service.decks_preconstruidos()
     meu_deck = service.deck_por_id(deck_id)
-    cartas_meu_deck = [slot.carta for slot in meu_deck.composicao().get()]
+    slots = service.slots_por_deck(meu_deck['id'])
+    cartas_meu_deck = [slot['card']['id'] for slot in slots]
+    #print(cartas_meu_deck)
     decks_contem = []
     for deck in preconstruidos:
-        slot_deck = [slot.carta for slot in deck.composicao().get()]
+        slots_deck = service.slots_por_deck(deck['id'])
+        slot_deck = [slot['card']['id'] for slot in slots_deck]
         presentes = set(slot_deck) & set(cartas_meu_deck)
+        #print('PRESENTES', presentes)
         if presentes:
-            nomes_presentes = list(
-                db.table('cartas')
-                .where_in('id', list(presentes))
-                .lists('nome')
-            )
-            decks_contem.append((deck.nome, nomes_presentes))
-    texto = '\n'.join(
-        [
-            f'**{item[0]}**' + '\n\t\t' + '\n\t\t'.join(item[1])
-            for item in decks_contem
-        ]
-    )
+            nomes_presentes = [ carta['name'] for carta in service.procurar_cartas_por_ids(presentes)]
+            decks_contem.append((deck['name'], nomes_presentes))
+    chunks = list(util.divide_chunks(decks_contem, 20))
     texto = colocar_titulo(
-        'Preconstruídos onde as cartas são encontradas', texto
+        'Preconstruídos onde as cartas são encontradas', ''
     )
     await app.send_message(message.chat.id, texto)
+    for nomes in chunks:
+        texto = '\n'.join(
+            [
+                f'**{item[0]}**' + '\n\t\t' + '\n\t\t'.join(item[1])
+                for item in nomes
+            ]
+        )
+        await app.send_message(message.chat.id, texto)
 
 
 @app.on_message(filters.command(['onde_faltantes']))
@@ -251,10 +253,9 @@ async def mostrar_faltantes_preconstruidos_handler(_, message):
 @app.on_message(filters.command(['entradas']))
 async def entradas_handler(_, message):
     username = message.from_user.username
-    usuario = service.procurar_usuario(usuarios[username])
-    entradas = service.entradas_por_usuario(usuario)
+    entradas = service.entradas_por_usuario(usuarios[username])
     texto = '\n'.join(
-        [f'{entrada.id} - {entrada.origem}' for entrada in entradas]
+        [f"{entrada['id']} - {entrada['name']}" for entrada in entradas]
     )
     texto = colocar_titulo('Movimentações de Entradas de Cartas', texto)
     await app.send_message(
@@ -262,13 +263,19 @@ async def entradas_handler(_, message):
     )
 
 
-@app.on_message(filters.command(['detalhe_entrada']))
+@app.on_message(filters.command(['detalhe_entrada', 'detalhe_saida']))
 async def detalhe_entrada(_, message):
-    entrada_id = message.command[1]
-    entrada = service.entrada_por_id(entrada_id)
-    texto = service.detalhe_entrada(entrada_id)
+    movimentacao_id = message.command[1]
+    movimentacao = service.movimentacao_por_id(movimentacao_id)
+    if not movimentacao:
+        await app.send_message(message.chat.id, 'Movimentação não encontrada.')
+        return
+    itens = service.itens_por_movimentacao(movimentacao_id)
+    texto = '\n'.join(
+        [f"{item['quantity']}x {item['card']['name']}" for item in itens  ]
+    )
     texto = colocar_titulo(
-        f'Detalhes da Movimentação de Entrada {entrada.origem}', texto
+        f"Detalhes da Movimentação de Entrada {movimentacao['name']}", texto
     )
     await app.send_message(
         message.chat.id, texto, parse_mode=enums.ParseMode.MARKDOWN
@@ -278,27 +285,12 @@ async def detalhe_entrada(_, message):
 @app.on_message(filters.command(['saidas']))
 async def saidas_handler(_, message):
     username = message.from_user.username
-    usuario = service.procurar_usuario(usuarios[username])
-    saidas = service.saidas_por_usuario(usuario)
-    texto = '\n'.join([f'{saida.id} - {saida.descricao}' for saida in saidas])
+    saidas = service.saidas_por_usuario(usuarios[username])
+    texto = '\n'.join([f"{saida['id']} - {saida['name']}" for saida in saidas])
     texto = colocar_titulo('Movimentações de Saídas de Cartas', texto)
     await app.send_message(
         message.chat.id, texto, parse_mode=enums.ParseMode.MARKDOWN
     )
-
-
-@app.on_message(filters.command(['detalhe_saida']))
-async def detalhe_saida(_, message):
-    saida_id = message.command[1]
-    saida = service.saida_por_id(saida_id)
-    texto = service.detalhe_saida(saida_id)
-    texto = colocar_titulo(
-        f'Detalhes da Movimentação de Saida {saida.descricao}', texto
-    )
-    await app.send_message(
-        message.chat.id, texto, parse_mode=enums.ParseMode.MARKDOWN
-    )
-
 
 @app.on_message(filters.command(['sugerir_nome_deck']))
 async def sugerir_nome_deck_handler(_, message):

@@ -1,13 +1,17 @@
-from datetime import datetime 
+from datetime import datetime, date 
 
 import requests
 import typer
 from rich.console import Console
 from rich.table import Table
+from dotenv import load_dotenv
 
 from gehennabot import service, sources
 from gehennabot.model import Carta
 from gehennabot  import api
+from gehennabot.util import date_to_json
+
+load_dotenv()
 
 app = typer.Typer()
 
@@ -96,16 +100,39 @@ def gehenna_api_create_card():
         print(f'Status code: {r.status_code}, Response: {r.json()}')
 
 @app.command()
-def gehenna_api_create_deck(username: str):
+def gehenna_api_create_deck(code: int):
+    deck = service.legado_deck_por_id(code)
+    date_created = date_to_json(deck.data_cadastro)
+    json_deck =  {
+        'name': deck.nome,
+        'description': deck.descricao,
+        'creator': deck.criador,
+        'player': deck.jogador,
+        'tipo': deck.tipo,
+        'created': date_created,
+        'updated': deck.ultima_atualizacao,
+        'preconstructed': deck.preconstruido or False,
+        'owner_id': deck.dono,
+        'code': deck.id
+    }
+    print(json_deck)
+    r = requests.post('http://localhost:8002/decks', json=json_deck)
+    print(f'Status code: {r.status_code}, Response: {r.json()}')
+
+   
+
+@app.command()
+def gehenna_api_create_decks(username: str):
     decks = service.legado_decks_por_usuario(username)
     for deck in decks:
+        date_created = date_to_json(deck.data_cadastro)
         json_deck =  {
             'name': deck.nome,
             'description': deck.descricao,
             'creator': deck.criador,
             'player': deck.jogador,
             'tipo': deck.tipo,
-            'created': deck.data_cadastro,
+            'created': date_created,
             'updated': deck.ultima_atualizacao,
             'preconstructed': deck.preconstruido or False,
             'owner_id': deck.dono,
@@ -116,18 +143,38 @@ def gehenna_api_create_deck(username: str):
         print(f'Status code: {r.status_code}, Response: {r.json()}')
 
 @app.command()
-def gehenna_api_create_slot(username: str):
-    decks = service.decks_por_usuario(username)
-    for deck in decks:
-        slot = service.legado_composicao_deck(deck['code'])
+def gehenna_api_create_slots_deck(code: int):
+    composicoes = service.legado_composicao_deck(code)
+    deck = service.deck_por_code(code)
+    for composicao in composicoes:
+        carta = api.carta_por_codigo(composicao['carta'])
         json_slot = {
-            'deck_id': slot.deck,
-            'card_id': slot.carta,
-            'quantity': slot.quantidade
+            'deck_id': deck['id'],
+            'card_id': carta['id'],
+            'quantity': composicao['quantidade'] if composicao['quantidade'] else 0,
+            'code': composicao['id']
         }
         print(json_slot)
-        r = requests.post("http://localhost:8002/slots/{deck['id']}", json=json_slot)
+        r = requests.post("http://localhost:8002/slots", json=json_slot)
         print(f'Status code: {r.status_code}, Response: {r.json()}')
+
+
+@app.command()
+def gehenna_api_create_slots(username: str):
+    decks = service.decks_por_usuario(username)
+    for deck in decks:
+        composicoes = service.legado_composicao_deck(deck['code'])
+        for composicao in composicoes:
+            carta = api.carta_por_codigo(composicao['carta'])
+            json_slot = {
+                'deck_id': deck['id'],
+                'card_id': carta['id'],
+                'quantity': composicao['quantidade'] if composicao['quantidade'] else 0,
+                'code': composicao['id']
+            }
+            print(json_slot)
+            r = requests.post("http://localhost:8002/slots", json=json_slot)
+            print(f'Status code: {r.status_code}, Response: {r.json()}')
 
 @app.command()
 def todas_cartas():
@@ -174,7 +221,7 @@ def preconstruidos():
 def usuarios():
     lista = service.procurar_usuarios()
     for usuario in lista:
-        print(usuario.username)
+        print(usuario['username'])
 
 
 @app.command()
@@ -188,19 +235,19 @@ def adicionar_precon(deck_id: int, dono: str):
 
 @app.command()
 def procura_carta(nome: str):
-    lista = service.legado_procurar_cartas_por_nome(nome)
+    lista = service.procurar_cartas_por_nome(nome)
     for carta in lista:
-        print(carta.id, carta.nome)
+        print(carta['id'], carta['name'])
 
 @app.command()
 def procura_carta_id(id: int):
-    carta = service.legado_procurar_carta(id)
-    print(carta.id, carta.nome)
+    carta = service.procurar_carta(id)
+    print(carta['id'], carta['name'])
 
 @app.command()
 def decks(nome: str, username='torcato'):
     table = Table(title=f'Decks de {username}')
-    lista = service.legado_decks_por_nome(username, nome)
+    lista = service.decks_por_nome(username, nome)
     table.add_column("ID", style="cyan")
     table.add_column("Name", style="cyan")
     for deck in lista:
@@ -256,6 +303,9 @@ def deck_vdb(url):
 def preconstruido_como_saida(deck_id, dono_id):
     ...
 
+@app.command()
+def total_decks(username: str):
+    print(service.total_decks(username))
 
 if __name__ == '__main__':
     app()

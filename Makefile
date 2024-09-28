@@ -18,7 +18,19 @@ deck-vdb:
 	poetry run python gehennabot/cli.py deck-vdb ${deckid}
 servidor:
 	poetry run python gehennabot/main.py
+usuarios:
+	poetry run python gehennabot/cli.py usuarios
 movimentacoes:
 	poetry run python gehennabot/cli.py gehenna-api-create-moviment ${username}
 itens:
 	poetry run python gehennabot/cli.py gehenna-api-create-item ${username}
+import-decks:
+	poetry run python gehennabot/cli.py gehenna-api-create-decks ${username}
+import-slots:
+	poetry run python gehennabot/cli.py gehenna-api-create-slots ${username}
+import-deck:
+	poetry run python gehennabot/cli.py gehenna-api-create-deck ${code}
+import-slots-deck:	
+	poetry run python gehennabot/cli.py gehenna-api-create-slots-deck ${code}
+import total-decks:
+	poetry run python gehennabot/cli.py total-decks ${username}

@@ -1,22 +1,20 @@
 from dotenv import dotenv_values
-from orator import DatabaseManager, Model
-from orator.orm import belongs_to_many, has_many, has_one
-
-GRUPOS = ['1', '2', '3', '4', '5', '6', '7', 'ANY']
+from masoniteorm.models import Model
+from masoniteorm.connections import ConnectionResolver
+from masoniteorm.relationships import belongs_to_many, has_many
 
 ambiente = dotenv_values('.env')
 
-config = {
+DATABASES = {
+    'default': 'sqlite',
     'sqlite': {
         'driver': 'sqlite',
         'database': ambiente['DATABASE_URL'],
     }
 }
 
-db = DatabaseManager(config)
-
-Model.set_connection_resolver(db)
-
+DB = ConnectionResolver().set_connection_details(DATABASES)
+GRUPOS = ['1', '2', '3', '4', '5', '6', '7', 'ANY']
 
 class Estoque(Model):
     __table__ = 'estoques'
