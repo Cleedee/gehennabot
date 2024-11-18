@@ -225,8 +225,9 @@ def usuarios():
 
 
 @app.command()
-def adicionar_precon(deck_id: int, dono: str):
-    entrada = service.legado_adicionar_deck_como_entrada(deck_id, dono)
+def adicionar_precon(deck_id: int, username: str):
+    dono = service.procurar_usuario(username)
+    entrada = service.adicionar_deck_como_entrada(deck_id, dono)
     if entrada:
         print('Nova entrada incluída.')
     else:
@@ -245,13 +246,13 @@ def procura_carta_id(id: int):
     print(carta['id'], carta['name'])
 
 @app.command()
-def decks(nome: str, username='torcato'):
+def decks(username='torcato'):
     table = Table(title=f'Decks de {username}')
-    lista = service.decks_por_nome(username, nome)
+    lista = service.decks_por_usuario(username)
     table.add_column("ID", style="cyan")
     table.add_column("Name", style="cyan")
     for deck in lista:
-        table.add_row(str(deck.id), deck.nome)
+        table.add_row(str(deck['id']), deck['name'])
     console = Console()
     console.print(table)
 
@@ -290,9 +291,10 @@ def copiar_deck(deck_id: int):
 
 @app.command()
 def baixar_internet(url, username):
-    usuario = service.legado_procurar_usuario(username)
-    deck = service.legado_extrair_deck_da_internet(url, usuario)
-    print(deck.nome, 'importado com id', deck.id)
+    usuario = service.procurar_usuario(username)
+    deck, slots = service.extrair_deck_da_internet(url, usuario)
+    print(deck)
+    print(slots)
 
 
 @app.command()

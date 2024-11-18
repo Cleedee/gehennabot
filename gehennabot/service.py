@@ -1,9 +1,11 @@
-from typing import Any, List, Union
+from typing import Any, List, Tuple, Union, Dict
+from datetime import date
 
 from masoniteorm.query import QueryBuilder
 
 from gehennabot import api, util
 from gehennabot.model import Carta, Deck, ItemEntrada, Usuario
+from gehennabot.schemas import Item
 from gehennabot.sources import select_search_strategy
 
 def procurar_usuario(username):
@@ -66,8 +68,21 @@ def deck_por_code(code):
 def decks_preconstruidos():
     return api.procurar_decks_preconstruidos()
 
-def extrair_deck_da_internet(url, usuario):
+def decks_por_nome(usuario, nome):
+    ...
+
+def cadastrar_deck(deck: Dict, slots: List[Dict]) -> Dict:
+    deck = api.cadastrar_deck(deck)
+    for slot in slots:
+        slot['deck_id'] = deck['id']
+        api.cadastrar_slot(slot)
+    return deck
+
+def extrair_deck_da_internet(url, usuario) -> Tuple[Dict, List]:
     slots = select_search_strategy(url)
+    if not slots:
+        return ({}, [])
+    print(slots)
     deck = {
         'name': 'Novo Deck',
         'description': url,
@@ -75,31 +90,58 @@ def extrair_deck_da_internet(url, usuario):
         'owner_id': usuario['id'],
         'code': 0
     }
-    deck = api.cadastrar_deck(deck)
-    print(deck)
     nao_encontradas = 'Não encontradas pelo bot RutorsHandBot:\n'
-    for slot in slots:
-        carta = procurar_carta_por_nome(slot.nome)
+    itens = []
+    for key in slots.keys():
+        carta = api.procurar_carta_por_codevdb(key)
         if carta:
             item = {
-                'deck_id': deck['id'],
-                'quantity': int(slot.quantidade),
-                'card_id': deck['card_id'],
+                'quantity': int(slots[key]),
+                'card_id': carta['id'],
                 'code': 0
             }
-            api.cadastrar_slot(item)
+            itens.append(item)
         else:
-            nao_encontradas += f'\n{slot.quantidade} x {slot.nome}'
+            nao_encontradas += f"\n{slots[key]} x {key}"
             deck['description'] = nao_encontradas
     #slots_deck = slots_por_deck(deck['id'])
     #nome = util.sugestao_nome_deck(slots_deck)
     #deck['name'] = nome
     #api.atualizar_deck(deck)
-    return deck
+    return deck, itens
 
 
 def slots_por_deck(deck_id):
     return api.procurar_slots_por_deck(deck_id)
+
+def adicionar_deck_como_entrada(deck_id: int, usuario: Dict):
+    deck = deck_por_id(deck_id)
+    slots = slots_por_deck(deck_id)
+    movimento: Dict = {
+        'name': deck['name'],
+        'tipo': 'E',
+        'owner_id': usuario['id'],
+        'date_move': date.today().isoformat(),
+        'price': '0.0',
+        'code': 0
+    }
+    movimento_cadastrado = api.cadastrar_movimento(movimento)
+    if not movimento_cadastrado:
+        return {}
+    # cadastrar itens de um movimento de entrada 
+    for slot in slots:
+        item = Item(
+            slot['card_id'],
+            movimento_cadastrado['id'],
+            slot['quantity'],
+            0
+        )
+        api.cadastrar_item(item)
+    # card_id: int
+    # moviment_id: int
+    # quantity: int
+    # code: int
+    return movimento_cadastrado
 
 def legado_procurar_carta(id: int) -> Carta:
     return Carta.find(id)
@@ -155,3 +197,6 @@ def total_decks(username: str) -> int:
     if usuario:
         return Deck.where('dono', usuario.id).count()
     return 0
+
+def cartas_que_faltam_para_o_deck():
+    return

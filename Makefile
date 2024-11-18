@@ -32,5 +32,7 @@ import-deck:
 	poetry run python gehennabot/cli.py gehenna-api-create-deck ${code}
 import-slots-deck:	
 	poetry run python gehennabot/cli.py gehenna-api-create-slots-deck ${code}
-import total-decks:
+import-total-decks:
 	poetry run python gehennabot/cli.py total-decks ${username}
+adicionar-precon:
+	poetry run python gehennabot/cli.py adicionar-precon ${deck_id} ${username}

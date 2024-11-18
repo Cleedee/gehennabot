@@ -1,11 +1,25 @@
 from typing import Dict
 import requests
 
+from gehennabot.schemas import Item
+
 URL = 'http://localhost:8002'
 
 def movimentacoes_por_usuario(username: str):
     r = requests.get(f'{URL}/stocks/moviments/{username}')
     return r.json()['moviments']
+
+def cadastrar_movimento(movimento: Dict) -> dict:
+    r = requests.post(f'{URL}/stocks/moviments', json=movimento)
+    if r.status_code == 201:
+        return r.json()
+    return {}
+
+def cadastrar_item(item: Item) -> Dict:
+    r = requests.post(f'{URL}/stocks/items', json=item._asdict())
+    if r.status_code == 201:
+        return r.json()
+    return {}
 
 def carta_por_codigo(codigo: str) -> dict:
     r = requests.get(f'{URL}/cards/?code={codigo}')
@@ -24,6 +38,12 @@ def procurar_carta_por_nome(nome: str) -> dict:
 def procurar_cartas_por_nome(nome: str, pagina: int = 0, por_pagina = 100):
     r = requests.get(f'{URL}/cards/?name={nome}&skip={pagina}&limit={por_pagina}')
     return r.json()['cards']
+
+def procurar_carta_por_codevdb(codevdb: int, pagina: int = 0, por_pagina = 100) -> Dict:
+    r = requests.get(f'{URL}/cards/?codevdb={codevdb}')
+    cartas = r.json()['cards']
+    carta = cartas[0] if len(cartas) > 0 else {}
+    return carta
 
 def procurar_cartas_todas(pagina: int = 0, por_pagina: int = 100):
     r = requests.get(f'{URL}/cards/?skip={pagina}&limit={por_pagina}')
@@ -81,7 +101,8 @@ def cadastrar_slot(slot: Dict) -> Dict:
     return r.json()
 
 def procurar_decks_por_usuario(username:str):
-    r = requests.get(f'{URL}/decks?username={username}')
+    total = total_decks(username)
+    r = requests.get(f'{URL}/decks?username={username}&limit={total}')
     return r.json()['decks']
 
 def procurar_deck_por_id(id: str):
@@ -98,6 +119,10 @@ def procurar_deck_por_code(code: str):
 def procurar_decks_preconstruidos():
     r = requests.get(f'{URL}/decks?preconstructed=True')
     return r.json()['decks']
+
+def total_decks(username: str) -> int:
+    r = requests.get(f'{URL}/decks/{username}/total')
+    return int(r.json()['quantity'])
 
 def procurar_slots_por_deck(deck_id: str):
     r = requests.get(f'{URL}/slots/{deck_id}/deck')

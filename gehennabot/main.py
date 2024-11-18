@@ -175,9 +175,10 @@ async def deck_from_url_handler(_, message):
     url = message.command[1]
     username = message.from_user.username
     usuario = service.procurar_usuario(usuarios[username])
-    deck = service.extrair_deck_da_internet(url, usuario)
+    deck, slots = service.extrair_deck_da_internet(url, usuario)
+    deck = service.cadastrar_deck(deck, slots)
     if deck:
-        await app.send_message(message.chat.id, f'{deck.nome} criado.')
+        await app.send_message(message.chat.id, f'{deck["name"]} criado com id {deck["id"]}.')
     else:
         await app.send_message(
             message.chat.id, 'Nenhum deck encontrado nesta URL.'
@@ -228,7 +229,7 @@ async def mostrar_faltantes_preconstruidos_handler(_, message):
     if meu_deck is None:
         await app.send_message(message.chat.id, 'Deck não encontrado.')
         return
-    if meu_deck.dono != usuario.id:
+    if meu_deck['owner_id'] != usuario['id']:
         await app.send_message(message.chat.id, 'Deck não encontrado.')
         return
     faltantes = service.cartas_que_faltam_para_o_deck(meu_deck)
