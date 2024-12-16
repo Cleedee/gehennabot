@@ -212,9 +212,9 @@ def todas_cartas():
 
 @app.command()
 def preconstruidos():
-    lista = service.legado_decks_preconstruidos()
+    lista = service.decks_preconstruidos()
     for deck in lista:
-        print(deck.id, deck.nome)
+        print(deck['id'], deck['name'])
 
 
 @app.command()

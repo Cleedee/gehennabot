@@ -36,3 +36,5 @@ import-total-decks:
 	poetry run python gehennabot/cli.py total-decks ${username}
 adicionar-precon:
 	poetry run python gehennabot/cli.py adicionar-precon ${deck_id} ${username}
+preconstruidos:
+	poetry run python gehennabot/cli.py preconstruidos
