@@ -1,3 +1,4 @@
+from typing import Dict, List
 import service
 import util
 from dotenv import dotenv_values
@@ -31,7 +32,7 @@ def representa_library(codigo_carta, usuario):
     users = service.procurar_donos_da_carta(carta['id'])
     donos = ' '.join([ u['username'] for u in users ])
     texto = f"""
-**Nome:** {carta['name']}\n
+**Nome:** {carta['name']} ({codigo_carta})\n
 **Tipo:** {carta['tipo']}\n
 **Disciplina:** {carta['disciplines']}\n
 **Texto:** {carta['text']}\n
@@ -47,7 +48,7 @@ def representa_crypt(codigo_carta, usuario):
     users = service.procurar_donos_da_carta(carta['id'])
     donos = ' '.join([ u['username'] for u in users ])
     texto = f"""
-**Nome:** {carta['name']}\n
+**Nome:** {carta['name']} ({codigo_carta})\n
 **Capacidade:** {carta['capacity']}\n
 **Disciplina:** {carta['disciplines']}\n
 **Seita:** {carta['sect']}\n
@@ -93,7 +94,22 @@ async def procuracarta_handler(_, message):
             message.chat.id, texto, parse_mode=enums.ParseMode.MARKDOWN
         )
     else:
-        await app.send_message(message.chat.id, 'Carta não encontrada.')
+        # tenta ver se na mensagem vem um ID
+        if nome.isdigit():
+            carta_id = int(nome)
+            carta = service.procurar_carta(carta_id)
+            if carta:
+                texto = (
+                    representa_crypt(carta['id'], usuario)
+                    if carta['tipo'] in CARTAS_DE_CRIPTA
+                    else representa_library(carta['id'], usuario)
+                )
+                await app.send_message(
+                    message.chat.id, 
+                    texto, 
+                    parse_mode=enums.ParseMode.MARKDOWN)
+        else:
+            await app.send_message(message.chat.id, 'Carta não encontrada.')
 
 
 @app.on_message(filters.command(['decks']))
@@ -202,7 +218,7 @@ async def onde_encontrar_handler(_, message):
         if presentes:
             nomes_presentes = [ carta['name'] for carta in service.procurar_cartas_por_ids(presentes)]
             decks_contem.append((deck['name'], nomes_presentes))
-    chunks = list(util.divide_chunks(decks_contem, 20))
+    chunks = list(util.divide_chunks(decks_contem, 10))
     texto = colocar_titulo(
         'Preconstruídos onde as cartas são encontradas', ''
     )
@@ -214,6 +230,7 @@ async def onde_encontrar_handler(_, message):
                 for item in nomes
             ]
         )
+        print(texto)
         await app.send_message(message.chat.id, texto)
 
 
@@ -293,6 +310,7 @@ async def saidas_handler(_, message):
         message.chat.id, texto, parse_mode=enums.ParseMode.MARKDOWN
     )
 
+# TODO reimplementar
 @app.on_message(filters.command(['sugerir_nome_deck']))
 async def sugerir_nome_deck_handler(_, message):
     if len(message.command) < 2:
@@ -304,6 +322,40 @@ async def sugerir_nome_deck_handler(_, message):
     await app.send_message(
         message.chat.id, nome_sugerido, parse_mode=enums.ParseMode.MARKDOWN
     )
+
+@app.on_message(filters.command(['renomear']))
+async def renomear_handler(_, message):
+    if len(message.command) < 2:
+        await app.send_message(message.chat.id, 'Informe o ID do deck.')
+        return
+    id = message.command[1]
+    nome = ' '.join(message.command[2:])
+    username = message.from_user.username
+    if username not in usuarios:
+        await app.send_message(message.chat.id, 'Conta não encontrada.')
+        return
+    deck = service.deck_por_id(id)
+    if not deck:
+        await app.send_message(message.chat.id, 'Deck não encontrado.')
+        return
+    deck['name'] = nome
+    service.atualizar_deck(deck)
+    await app.send_message(message.chat.id, 'Deck atualizado.')
+
+@app.on_message(filters.command(['cartas']))
+async def cartas_handler(_, message):
+    nome = ' '.join(message.command[1:])
+    print(nome)
+    cartas: List[Dict] = service.procurar_cartas_por_nome(nome)
+    if cartas:
+        texto = '\n'.join(
+            [f"{carta['id']} - {carta['name']} ({carta['tipo']})" for carta in cartas]
+        )
+        await app.send_message(message.chat.id, texto)
+    else:
+        await app.send_message(message.chat.id, 'Nenhuma carta encontrada.')
+
+    
 
 
 app.run()

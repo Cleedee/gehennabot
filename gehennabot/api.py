@@ -96,6 +96,12 @@ def cadastrar_deck(deck: Dict) -> Dict:
     r = requests.post(f'{URL}/decks', json=deck)
     return r.json()
 
+def atualizar_deck(deck: Dict) -> Dict:
+    r = requests.put(f'{URL}/decks/{deck["id"]}', json=deck)
+    if r.status_code == 404:
+        pass
+    return r.json()
+
 def cadastrar_slot(slot: Dict) -> Dict:
     r = requests.post(f'{URL}/slots', json=slot)
     return r.json()

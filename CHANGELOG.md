@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Mostrar imagens das cartas
 
+## 0.9.0
+
+- Renomear deck usando o comando /renomear
+- Pesquisa de cartas por parte do nome usando comando /cartas
+- Pesquisa de carta por ID usando comando /carta
+
 ## [0.8.0]
 
 - Cadastrar Movimento a partir de um deck
@@ -35,7 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.0]
 
-- Cadastro de deck por URL (https://vtesdecks.com/) no formato Lackey
+- Cadastro de deck por URL (<https://vtesdecks.com/>) no formato Lackey
 
 ## [0.3.0]
 

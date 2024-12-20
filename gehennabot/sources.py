@@ -13,15 +13,15 @@ URL_API_DECK = 'https://vdb.im/api/deck/'
 Slot = namedtuple('Slot', 'quantidade nome')
 
 
-def select_search_strategy(url: str) -> List[Slot]:
+def select_search_strategy(url: str) -> Dict:
     if 'vdb.im' in url:
         return slots_from_vdb(url)
-    if 'https://vtesdecks.com/' in url:
-        print('Aqui')
-        return slots_from_vtescards(url)
-    return []
+#    if 'https://vtesdecks.com/' in url:
+#        print('Aqui')
+#        return slots_from_vtescards(url)
+    return {}
 
-
+# TODO reimplementar
 def slots_from_vtescards(url: str) -> List[Slot]:
     deck_id = url.split('deck/')[1]
     r = requests.get(
@@ -46,7 +46,8 @@ def slots_from_vdb(url: str) -> Dict:
         print('Deck não encontrado.')
         return {}
     cards = r.json().get('cards')
-    return cards 
+    print(cards)
+    return cards
 
 
 def slots_from_amaranth(url: str) -> list[Slot]:
