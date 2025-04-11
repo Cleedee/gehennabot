@@ -8,6 +8,8 @@ https://stackoverflow.blog/2020/03/02/best-practices-for-rest-api-design/
 
 COMANDOS
 ---------
+
+anote - Receber um prompt para colar cartas para salvar
 carta - Procura carta pelo nome
 cartas - Procura cartas por parte do nome
 deck - Passe o código do deck para listar um deck
@@ -28,4 +30,21 @@ renomear - Alterar o nome do deck
 FAZENDO AGORA
 ---------
 
-Procura carta também pelo ID.
+Comando para anotar lista de cartas
+
+
+ALGORITMO
+-----------
+
+Quando o usuário mandar a mensagem /anote, o bot fica
+esperando por novas mensagens para salvar numa sessão.
+
+Após as mensagens serem enviadas, o usuário pode mandar
+a mensagem /salvar, que tentará validar as mensagens
+como uma lista de cartas, as quantificando e reconhecendo
+as cartas. A resposta será a lista correta ou a linhas
+com erro.
+
+Depois disso, há duas opções: o comando /saida ou o comando
+/entrada. O primeiro salvará a lista com uma saída de cartas
+e o outro como uma nova entrada.

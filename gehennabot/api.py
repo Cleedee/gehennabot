@@ -27,6 +27,8 @@ def carta_por_codigo(codigo: str) -> dict:
 
 def procurar_carta_por_id(id: int) -> dict:
     r = requests.get(f'{URL}/cards/{id}')
+    if r.status_code == 404:
+        return {}
     return r.json()
 
 def procurar_carta_por_nome(nome: str) -> dict:
@@ -99,7 +101,7 @@ def cadastrar_deck(deck: Dict) -> Dict:
 def atualizar_deck(deck: Dict) -> Dict:
     r = requests.put(f'{URL}/decks/{deck["id"]}', json=deck)
     if r.status_code == 404:
-        pass
+        return {}
     return r.json()
 
 def cadastrar_slot(slot: Dict) -> Dict:
@@ -109,6 +111,10 @@ def cadastrar_slot(slot: Dict) -> Dict:
 def procurar_decks_por_usuario(username:str):
     total = total_decks(username)
     r = requests.get(f'{URL}/decks?username={username}&limit={total}')
+    return r.json()['decks']
+
+def procurar_decks_por_nome(username: str, nome_deck: str):
+    r = requests.get(f'{URL}/decks?username={username}&name={nome_deck}')
     return r.json()['decks']
 
 def procurar_deck_por_id(id: str):

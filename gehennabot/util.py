@@ -1,4 +1,5 @@
 from datetime import datetime, date
+import re
 
 def date_to_json(data):
     if not data:
@@ -80,3 +81,18 @@ def divide_chunks(l, n):
     for i in range(0, len(l), n):
         yield l[i:i + n]
 
+def extrair_quantidade_nome(lista):
+    dados = []
+    for item in lista:
+        linha = item.strip()
+        print(linha)
+        partes = re.split(r'\s*x?\s*', linha, 1)
+        print(partes)
+        if len(partes) == 2:
+            quantidade, nome = partes
+            try:
+                quantidade = int(quantidade)
+                dados.append((quantidade, nome))
+            except ValueError:
+                pass
+    return dados

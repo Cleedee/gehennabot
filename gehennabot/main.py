@@ -1,4 +1,6 @@
+from collections import defaultdict
 from typing import Dict, List
+from gehennabot.util import extrair_quantidade_nome
 import service
 import util
 from dotenv import dotenv_values
@@ -17,6 +19,8 @@ usuarios = {
     'paulophi': 'vdeving',
     'igoxr': 'igoxr',
 }
+
+NOTAS = {}
 
 app = Client(
     'RutorsHandBot',
@@ -108,16 +112,22 @@ async def procuracarta_handler(_, message):
                     message.chat.id, 
                     texto, 
                     parse_mode=enums.ParseMode.MARKDOWN)
+            else:
+                await app.send_message(message.chat.id, 'Carta não encontrada.')
         else:
             await app.send_message(message.chat.id, 'Carta não encontrada.')
 
 
 @app.on_message(filters.command(['decks']))
 async def decks_handler(_, message):
+    nome = ' '.join(message.command[1:])
     username = message.from_user.username
     if username not in usuarios:
         await app.send_message(message.chat.id, 'Conta não encontrada.')
-    decks = service.decks_por_usuario(usuarios[username])
+    if nome:
+        decks = service.decks_por_nome(usuarios[username], nome)
+    else:
+        decks = service.decks_por_usuario(usuarios[username])
     if decks:
         chunks = list(util.divide_chunks(decks, 20))
         for baralhos in chunks:
@@ -355,8 +365,41 @@ async def cartas_handler(_, message):
     else:
         await app.send_message(message.chat.id, 'Nenhuma carta encontrada.')
 
-    
+@app.on_message(filters.command(['anote']))
+async def anote_handler(_, message):
+    username = message.from_user.username
+    if username not in usuarios:
+        await app.send_message(message.chat.id, 'Conta não encontrada.')
+        return
+    if not NOTAS.get(username):
+        NOTAS[username] = []
+    await app.send_message(message.chat.id, 'Cole sua lista.')
 
+
+@app.on_message(filters.command(['avalie']))
+async def avalie_handler(_, message):
+    username = message.from_user.username
+    if username not in usuarios:
+        await app.send_message(message.chat.id, 'Conta não encontrada.')
+        return
+    if username in NOTAS:
+        itens = NOTAS[username]
+        dados = extrair_quantidade_nome(itens)
+        print(dados)
+    else:
+        await app.send_message(message.chat.id, 'Nada a avaliar.')
+
+@app.on_message(filters.text | filters.private)
+async def mensagem_handler(_, message):
+    username = message.from_user.username
+    if username not in usuarios:
+        await app.send_message(message.chat.id, 'Conta não encontrada.')
+        return
+    if username in NOTAS:
+        itens = message.text.split('\n')
+        NOTAS[username].extend(itens)
+        print(NOTAS[username])
+        await app.send_message(message.chat.id, 'Adicionada à lista.')
 
 app.run()
 print('Encerrando...')

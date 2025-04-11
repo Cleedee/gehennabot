@@ -69,7 +69,7 @@ def decks_preconstruidos():
     return api.procurar_decks_preconstruidos()
 
 def decks_por_nome(usuario, nome):
-    ...
+    return api.procurar_decks_por_nome(usuario, nome)
 
 def cadastrar_deck(deck: Dict, slots: List[Dict]) -> Dict:
     deck = api.cadastrar_deck(deck)
