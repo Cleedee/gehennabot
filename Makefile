@@ -16,6 +16,8 @@ decks:
 	poetry run python gehennabot/cli.py decks ${name}
 deck-vdb:
 	poetry run python gehennabot/cli.py deck-vdb ${deckid}
+apagar-deck:
+	poetry run python gehennabot/cli.py apagar-deck ${id}
 servidor:
 	poetry run python gehennabot/main.py
 usuarios:

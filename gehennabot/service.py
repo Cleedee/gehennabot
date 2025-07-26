@@ -81,6 +81,9 @@ def cadastrar_deck(deck: Dict, slots: List[Dict]) -> Dict:
 def atualizar_deck(deck: Dict):
     api.atualizar_deck(deck)
 
+def apagar_deck(deck_id):
+    api.apagar_deck(deck_id)
+
 def extrair_deck_da_internet(url, usuario) -> Tuple[Dict, List]:
     slots = select_search_strategy(url)
     if not slots:

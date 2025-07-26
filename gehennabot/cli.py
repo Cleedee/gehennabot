@@ -257,6 +257,10 @@ def decks(username='torcato'):
     console.print(table)
 
 @app.command()
+def apagar_deck(id: int):
+    service.apagar_deck(id)
+
+@app.command()
 def adicionar(deck_id: int, carta_id: int, quantidade: int):
     service.legado_adicionar_cartas_ao_deck(deck_id, carta_id, quantidade)
     print('Cartas adicionadas.')

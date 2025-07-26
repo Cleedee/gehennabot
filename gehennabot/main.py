@@ -299,7 +299,8 @@ async def detalhe_entrada(_, message):
         await app.send_message(message.chat.id, 'Movimentação não encontrada.')
         return
     itens = service.itens_por_movimentacao(movimentacao_id)
-    texto = '\n'.join(
+    texto = f"Data: {movimentacao['date_move']}\nPreço: {movimentacao['price']}\n______\n"
+    texto = texto + '\n'.join(
         [f"{item['quantity']}x {item['card']['name']}" for item in itens  ]
     )
     texto = colocar_titulo(

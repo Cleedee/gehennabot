@@ -104,6 +104,12 @@ def atualizar_deck(deck: Dict) -> Dict:
         return {}
     return r.json()
 
+def apagar_deck(id: str):
+    r = requests.delete(f'{URL}/decks/{id}')
+    if r.status_code == 404:
+        return {}
+    return r.json()
+
 def cadastrar_slot(slot: Dict) -> Dict:
     r = requests.post(f'{URL}/slots', json=slot)
     return r.json()

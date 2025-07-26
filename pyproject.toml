@@ -14,7 +14,7 @@ requests = "^2.31.0"
 pyaes = "^1.6.1"
 typer = {extras = ["all"], version = "^0.9.0"}
 rich = "^13.5.2"
-masonite-orm = "^2.22.0"
+masonite-orm = "3.0.0"
 
 [tool.poetry.group.dev.dependencies]
 jupyter = "^1.0.0"
