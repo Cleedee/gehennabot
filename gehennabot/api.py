@@ -52,9 +52,9 @@ def procurar_cartas_todas(pagina: int = 0, por_pagina: int = 100):
     return r.json()['cards']
 
 def procurar_cartas_por_ids(ids : list[int]):
-    query = '?'
-    for i  in query:
-        query += 'q=' + str(i)
+    query = '?ids='
+    for i in ids:
+        query += (str(i) + ',')
     r = requests.get(f'{URL}/cards/{query}')
     return r.json()['cards']
 

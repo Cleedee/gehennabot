@@ -43,7 +43,6 @@ def procurar_carta(id: int):
 
 def procurar_carta_por_nome(nome: str) -> dict:
     carta = api.procurar_carta_por_nome(nome)
-    print(carta)
     return carta
 
 def procurar_cartas_por_nome(nome: str) -> list[dict]:

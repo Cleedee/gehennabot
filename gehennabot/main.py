@@ -214,21 +214,30 @@ async def deck_from_url_handler(_, message):
 @app.on_message(filters.command(['onde']))
 async def onde_encontrar_handler(_, message):
     deck_id = message.command[1]
+    # traga decks preconstruidos
     preconstruidos = service.decks_preconstruidos()
+    # traga informações do deck
     meu_deck = service.deck_por_id(deck_id)
+    # traga os slots do deck
     slots = service.slots_por_deck(meu_deck['id'])
+    # separe as cartas do deck
     cartas_meu_deck = [slot['card']['id'] for slot in slots]
     #print(cartas_meu_deck)
     decks_contem = []
+    # para cada deck preconstruido faça:
     for deck in preconstruidos:
+        # separe os slots do preconstruido
         slots_deck = service.slots_por_deck(deck['id'])
+        # separe as cartas do deck preconstruido
         slot_deck = [slot['card']['id'] for slot in slots_deck]
+        # retorna os elementos (cartas) comuns aos dois conjuntos 
         presentes = set(slot_deck) & set(cartas_meu_deck)
-        #print('PRESENTES', presentes)
+        print('PRESENTES', presentes)
         if presentes:
             nomes_presentes = [ carta['name'] for carta in service.procurar_cartas_por_ids(presentes)]
             decks_contem.append((deck['name'], nomes_presentes))
-    chunks = list(util.divide_chunks(decks_contem, 10))
+    decks_contem_ordenados = sorted(decks_contem, key=lambda tupla: len(tupla[1]))
+    chunks = list(util.divide_chunks(decks_contem_ordenados, 10))
     texto = colocar_titulo(
         'Preconstruídos onde as cartas são encontradas', ''
     )
@@ -240,7 +249,7 @@ async def onde_encontrar_handler(_, message):
                 for item in nomes
             ]
         )
-        print(texto)
+        # print(texto)
         await app.send_message(message.chat.id, texto)
 
 
