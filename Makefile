@@ -1,44 +1,73 @@
+.PHONY: lint format
+
 env:
-	poetry env activate
+	uv sync
+
+lint:
+	uv run ruff . && uv run blue --check . --diff
+
+format:
+	uv run blue . && uv run isort .
+
 procura-carta:
-	poetry run python gehennabot/cli.py procura-carta ${nome}
+	uv run python -m gehennabot.cli procura-carta $(nome)
+
 procura-carta-id:
-	poetry run python gehennabot/cli.py procura-carta-id ${id}
+	uv run python -m gehennabot.cli procura-carta-id $(id)
+
 help:
-	poetry run python gehennabot/cli.py --help
+	uv run python -m gehennabot.cli --help
+
 adiciona-carta:
-	poetry run python gehennabot/cli.py adicionar ${deck} ${card} ${quantidade}
+	uv run python -m gehennabot.cli adicionar $(deck) $(card) $(quantidade)
+
 baixar-internet:
-	poetry run python gehennabot/cli.py baixar-internet ${deckid} ${username}
+	uv run python -m gehennabot.cli baixar-internet $(deckid) $(username)
+
 falta:
-	poetry run python gehennabot/cli.py falta ${deckid}
+	uv run python -m gehennabot.cli falta $(deckid)
+
 falta-procura:
-	poetry run python gehennabot/cli.py falta-e-procura ${deckid}
+	uv run python -m gehennabot.cli falta-e-procura $(deckid)
+
 decks:
-	poetry run python gehennabot/cli.py decks ${name}
+	uv run python -m gehennabot.cli decks $(name)
+
 deck-vdb:
-	poetry run python gehennabot/cli.py deck-vdb ${deckid}
+	uv run python -m gehennabot.cli deck-vdb $(deckid)
+
 apagar-deck:
-	poetry run python gehennabot/cli.py apagar-deck ${id}
+	uv run python -m gehennabot.cli apagar-deck $(id)
+
 server:
-	poetry run python gehennabot/main.py
+	cd gehennabot && uv run python -m gehennabot.main
+
 usuarios:
-	poetry run python gehennabot/cli.py usuarios
+	uv run python -m gehennabot.cli usuarios
+
 movimentacoes:
-	poetry run python gehennabot/cli.py gehenna-api-create-moviment ${username}
+	uv run python -m gehennabot.cli gehenna-api-create-moviment $(username)
+
 itens:
-	poetry run python gehennabot/cli.py gehenna-api-create-item ${username}
+	uv run python -m gehennabot.cli gehenna-api-create-item $(username)
+
 import-decks:
-	poetry run python gehennabot/cli.py gehenna-api-create-decks ${username}
+	uv run python -m gehennabot.cli gehenna-api-create-decks $(username)
+
 import-slots:
-	poetry run python gehennabot/cli.py gehenna-api-create-slots ${username}
+	uv run python -m gehennabot.cli gehenna-api-create-slots $(username)
+
 import-deck:
-	poetry run python gehennabot/cli.py gehenna-api-create-deck ${code}
-import-slots-deck:	
-	poetry run python gehennabot/cli.py gehenna-api-create-slots-deck ${code}
+	uv run python -m gehennabot.cli gehenna-api-create-deck $(code)
+
+import-slots-deck:
+	uv run python -m gehennabot.cli gehenna-api-create-slots-deck $(code)
+
 import-total-decks:
-	poetry run python gehennabot/cli.py total-decks ${username}
+	uv run python -m gehennabot.cli total-decks $(username)
+
 adicionar-precon:
-	poetry run python gehennabot/cli.py adicionar-precon ${deck_id} ${username}
+	uv run python -m gehennabot.cli adicionar-precon $(deck_id) $(username)
+
 preconstruidos:
-	poetry run python gehennabot/cli.py preconstruidos
+	uv run python -m gehennabot.cli preconstruidos

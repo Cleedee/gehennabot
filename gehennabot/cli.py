@@ -1,4 +1,5 @@
-from datetime import datetime, date 
+import os
+from datetime import datetime, date
 
 import requests
 import typer
@@ -11,7 +12,8 @@ from gehennabot.model import Carta
 from gehennabot  import api
 from gehennabot.util import date_to_json
 
-load_dotenv()
+env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
+load_dotenv(env_path)
 
 app = typer.Typer()
 

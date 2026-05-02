@@ -1,9 +1,11 @@
+import os
 from dotenv import dotenv_values
 from masoniteorm.models import Model
 from masoniteorm.connections import ConnectionResolver
 from masoniteorm.relationships import belongs_to_many, has_many
 
-ambiente = dotenv_values('.env')
+env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
+ambiente = dotenv_values(env_path)
 
 DATABASES = {
     'default': 'sqlite',

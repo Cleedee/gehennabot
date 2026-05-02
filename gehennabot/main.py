@@ -1,5 +1,6 @@
 from collections import defaultdict
 from typing import Dict, List
+import os
 from gehennabot.util import extrair_quantidade_nome
 import service
 import util
@@ -8,7 +9,8 @@ from pyrogram import Client, enums, filters
 
 CARTAS_DE_CRIPTA = ['Vampire', 'Imbuid']
 
-config = dotenv_values('.env')
+env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
+config = dotenv_values(env_path)
 
 print('Iniciando...')
 
