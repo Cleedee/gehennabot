@@ -1,3 +1,5 @@
+env:
+	poetry env activate
 procura-carta:
 	poetry run python gehennabot/cli.py procura-carta ${nome}
 procura-carta-id:
@@ -18,7 +20,7 @@ deck-vdb:
 	poetry run python gehennabot/cli.py deck-vdb ${deckid}
 apagar-deck:
 	poetry run python gehennabot/cli.py apagar-deck ${id}
-servidor:
+server:
 	poetry run python gehennabot/main.py
 usuarios:
 	poetry run python gehennabot/cli.py usuarios
